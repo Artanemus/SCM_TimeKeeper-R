@@ -88,6 +88,7 @@ type
     qryLaneEventID: TIntegerField;
     qryLaneFName: TWideStringField;
     dsLane: TDataSource;
+    qryDBVerInfo: TFDQuery;
     procedure qryHeatAfterScroll(DataSet: TDataSet);
     procedure DataModuleCreate(Sender: TObject);
 

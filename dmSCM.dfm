@@ -1,5 +1,4 @@
 object SCM: TSCM
-  OldCreateOrder = False
   OnCreate = DataModuleCreate
   Height = 607
   Width = 493
@@ -718,5 +717,21 @@ object SCM: TSCM
     DataSet = qryLane
     Left = 112
     Top = 378
+  end
+  object qryDBVerInfo: TFDQuery
+    Connection = scmConnection
+    SQL.Strings = (
+      'USE SwimClubMeet'
+      ';'
+      ''
+      'SELECT [SCMSystemID]'
+      '      ,[DBVersion]'
+      '      ,[Major]'
+      '      ,[Minor]'
+      '  FROM [dbo].[SCMSystem]'
+      '  '
+      'WHERE SCMSystemID = 1;')
+    Left = 232
+    Top = 288
   end
 end
