@@ -194,6 +194,8 @@ type
     procedure ConnectOnTerminate(Sender: TObject);
     procedure btnBKSClickTerminate(Sender: TObject);
 
+    procedure GetSCMVerInfo();
+
   public
     { Public declarations }
     procedure scmOptionsLoad;
@@ -229,7 +231,7 @@ uses
   // FOR scmLoadOptions
   System.IniFiles,
   // FOR Floor
-  System.Math;
+  System.Math, SCMExeInfo;
 
 {$REGION 'ACTION MANAGER'}
 
@@ -686,6 +688,8 @@ begin
 
   // Toggles visibility of icons in tabLoginSession.
   scmUpdateTabSheetsImages;
+  // Label showing application and database version
+  GetSCMVerInfo;
 
 end;
 
@@ -816,6 +820,30 @@ begin
   end;
   // CLEAN MEMORY
   SCM.Free;
+end;
+
+procedure TTimeKeeper.GetSCMVerInfo;
+{$IF defined(MSWINDOWS)}
+var
+  myExeInfo: TExeInfo;
+{$ENDIF}
+begin
+  // if connected - display the application version
+  // and the SwimClubMeet database version.
+  if Assigned(SCM) then
+    if SCM.scmConnection.Connected then
+      Label1.Text := 'DB v' + SCM.GetDBVerInfo
+    else
+      Label1.Text := '';
+
+{$IF defined(MSWINDOWS)}
+  // get the application version number
+  myExeInfo := TExeInfo.Create(self);
+  Label1.Text := 'App v' + myExeInfo.FileVersion + ' - ' +
+    Label1.Text;
+  myExeInfo.Free;
+
+{$ENDIF}
 end;
 
 procedure TTimeKeeper.imgStopWatchClick(Sender: TObject);

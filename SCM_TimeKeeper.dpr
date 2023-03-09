@@ -6,7 +6,8 @@ uses
   frmTimeKeeper in 'frmTimeKeeper.pas' {TimeKeeper},
   dmSCM in 'dmSCM.pas' {SCM: TDataModule},
   dlgSCMOptions in 'dlgSCMOptions.pas' {scmOptions},
-  dlgSCMStopWatch in 'dlgSCMStopWatch.pas' {scmStopWatch};
+  dlgSCMStopWatch in 'dlgSCMStopWatch.pas' {scmStopWatch},
+  SCMExeInfo in 'SCMExeInfo.pas';
 
 {$R *.res}
 

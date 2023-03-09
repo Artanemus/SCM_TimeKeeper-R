@@ -88,7 +88,8 @@ type
     qryLaneEventID: TIntegerField;
     qryLaneFName: TWideStringField;
     dsLane: TDataSource;
-    qryDBVerInfo: TFDQuery;
+    qrySCMSystem: TFDQuery;
+    dsSCMSystem: TDataSource;
     procedure qryHeatAfterScroll(DataSet: TDataSet);
     procedure DataModuleCreate(Sender: TObject);
 
@@ -98,6 +99,7 @@ type
   var
     FIsActive: Boolean;
     FFlagLane: Boolean;
+    fDBModel, fDBVersion, fDBMajor, fDBMinor: integer;
 
   private
     { Private declarations }
@@ -114,6 +116,8 @@ type
     function LocateLaneNum(LaneNum: Integer): Boolean;
     function LocateLaneID(LaneID: Integer): Boolean;
     //
+    function GetDBVerInfo: string;
+
     procedure FilterClosedSessions(HideClosedSessions: Boolean);
     procedure SimpleMakeTemporyFDConnection(Server, User, Password: String;
       OsAuthent: Boolean);
@@ -210,6 +214,29 @@ begin
     qrySession.Filter := '(SessionStatusID = 1)';
   if not qrySession.Filtered then
     qrySession.Filtered := True;
+end;
+
+function TSCM.GetDBVerInfo: string;
+begin
+  result := '';
+  if scmConnection.Connected then
+  begin
+    with qrySCMSystem do
+    begin
+      Connection := scmConnection;
+      Open;
+      if Active then
+      begin
+        fDBModel := FieldByName('SCMSystemID').AsInteger;
+        fDBVersion := FieldByName('DBVersion').AsInteger;
+        fDBMajor := FieldByName('Major').AsInteger;
+        fDBMinor := FieldByName('Minor').AsInteger;
+        result := IntToStr(fDBModel) + '.' + IntToStr(fDBVersion) + '.' +
+          IntToStr(fDBMajor) + '.' + IntToStr(fDBMinor);
+      end;
+      Close;
+    end;
+  end;
 end;
 
 {$REGION 'LOCATE SPECIFIC RECORD'}

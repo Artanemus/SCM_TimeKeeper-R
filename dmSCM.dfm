@@ -718,20 +718,19 @@ object SCM: TSCM
     Left = 112
     Top = 378
   end
-  object qryDBVerInfo: TFDQuery
+  object qrySCMSystem: TFDQuery
+    ActiveStoredUsage = [auDesignTime]
     Connection = scmConnection
     SQL.Strings = (
-      'USE SwimClubMeet'
-      ';'
+      'USE SwimClubMeet;'
       ''
-      'SELECT [SCMSystemID]'
-      '      ,[DBVersion]'
-      '      ,[Major]'
-      '      ,[Minor]'
-      '  FROM [dbo].[SCMSystem]'
-      '  '
-      'WHERE SCMSystemID = 1;')
-    Left = 232
+      'SELECT * FROM SCMSystem WHERE SCMSystemID = 1;')
+    Left = 360
     Top = 288
+  end
+  object dsSCMSystem: TDataSource
+    DataSet = qrySCMSystem
+    Left = 360
+    Top = 344
   end
 end
