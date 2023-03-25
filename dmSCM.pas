@@ -119,10 +119,10 @@ type
     function GetDBVerInfo: string;
 
     procedure FilterClosedSessions(HideClosedSessions: Boolean);
-    procedure SimpleMakeTemporyFDConnection(Server, User, Password: String;
-      OsAuthent: Boolean);
-    procedure SimpleSaveSettingString(ASection, AName, AValue: String);
-    procedure SimpleLoadSettingString(ASection, AName: String; var AValue: String);
+//    procedure SimpleMakeTemporyFDConnection(Server, User, Password: String;
+//      OsAuthent: Boolean);
+//    procedure SimpleSaveSettingString(ASection, AName, AValue: String);
+//    procedure SimpleLoadSettingString(ASection, AName: String; var AValue: String);
 
     property IsActive: Boolean read FIsActive;
     property FlagLane: Boolean read FFlagLane write SetFlagLane;
@@ -399,13 +399,15 @@ begin
 
 end;
 
-{$REGION 'SIMPLE TEMPORY CONNECTION AND INIFILES CONFIGURATION'}
-
 procedure TSCM.SetFlagLane(Value: Boolean);
 begin
   FFlagLane := Value;
 end;
 
+
+{$REGION 'SIMPLE TEMPORY CONNECTION AND INIFILES CONFIGURATION'}
+
+{
 procedure TSCM.SimpleLoadSettingString(ASection, AName: String; var AValue: String);
 var
   ini: TIniFile;
@@ -425,22 +427,6 @@ begin
 
 end;
 
-(*
-  User_Name=Ben
-  Database=SwimClubMeet
-  OSAuthent=Yes
-  Server=localhost\SQLEXPRESS
-  DriverID=MSSQL
-  MetaDefSchema=dbo
-  ExtendedMetadata=False
-  MetaDefCatalog=
-  ApplicationName=SwimClubMeet
-  Workstation=localhost
-  MARS=yes
-  User_Name=
-  Password=*****
-  Name=MSSQL_SwimClubMeet
-*)
 
 procedure TSCM.SimpleMakeTemporyFDConnection(Server, User, Password: String;
   OsAuthent: Boolean);
@@ -497,6 +483,9 @@ begin
   end;
 
 end;
+
+}
+
 {$ENDREGION}
 
 

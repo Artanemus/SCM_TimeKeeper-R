@@ -4,8 +4,8 @@
         <ProjectVersion>19.5</ProjectVersion>
         <FrameworkType>FMX</FrameworkType>
         <Base>True</Base>
-        <Config Condition="'$(Config)'==''">Debug</Config>
-        <Platform Condition="'$(Platform)'==''">Win32</Platform>
+        <Config Condition="'$(Config)'==''">Release</Config>
+        <Platform Condition="'$(Platform)'==''">Win64</Platform>
         <TargetedPlatforms>693267</TargetedPlatforms>
         <AppType>Application</AppType>
         <MainSource>SCM_TimeKeeper.dpr</MainSource>
@@ -285,8 +285,8 @@
         <VerInfo_MajorVer>2</VerInfo_MajorVer>
         <VerInfo_MinorVer>2</VerInfo_MinorVer>
         <VerInfo_Release>3</VerInfo_Release>
-        <VerInfo_Keys>CompanyName=Artanemus;FileDescription=$(MSBuildProjectName);FileVersion=2.2.3.2;InternalName=TimeKeeper;LegalCopyright=copyright (c) 2021-2022 Artanemus;LegalTrademarks=Artanemus;OriginalFilename=SCM_TimeKeeper.exe;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=2.2;Comments=Record swimmers racetimes. A utility for SwimClubMeet.</VerInfo_Keys>
-        <VerInfo_Build>2</VerInfo_Build>
+        <VerInfo_Keys>CompanyName=Artanemus;FileDescription=$(MSBuildProjectName);FileVersion=2.2.3.3;InternalName=TimeKeeper;LegalCopyright=copyright (c) 2021-2022 Artanemus;LegalTrademarks=Artanemus;OriginalFilename=SCM_TimeKeeper.exe;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=2.2;Comments=Record swimmers racetimes. A utility for SwimClubMeet.</VerInfo_Keys>
+        <VerInfo_Build>3</VerInfo_Build>
     </PropertyGroup>
     <ItemGroup>
         <DelphiCompile Include="$(MainSource)">
@@ -309,7 +309,9 @@
             <Form>scmStopWatch</Form>
             <FormType>fmx</FormType>
         </DCCReference>
-        <DCCReference Include="SCMExeInfo.pas"/>
+        <DCCReference Include="..\SCM_SHARED\exeinfo.pas"/>
+        <DCCReference Include="..\SCM_SHARED\SCMSimpleConnect.pas"/>
+        <DCCReference Include="..\SCM_SHARED\SCMUtility.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

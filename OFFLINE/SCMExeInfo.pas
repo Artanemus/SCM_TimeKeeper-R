@@ -4,12 +4,18 @@ unit SCMExeInfo;
 interface
 
 uses
+{$IFDEF FRAMEWORK_VCL}
+  vcl.Forms, vcl.Graphics, vcl.Controls, vcl.Dialogs,
+{$IFEND}
+
+{$IFDEF FRAMEWORK_FMX}
   FMX.Forms,
   FMX.Graphics,
   FMX.Controls,
   FMX.Dialogs,
-  TypInfo,
-  Windows, Messages, SysUtils, Classes;
+{$IFEND}
+
+  TypInfo, Windows, Messages, SysUtils, Classes;
 
 const
   MAJ_VER = 1; // Major version nr.
@@ -172,9 +178,13 @@ begin
       end
       else
       begin
+      {$IFDEF FRAMEWORK_FMX}
         FileAge(ParamStr(0), FFileCreation);
-        // VCL only function.
-        // FileAge(Application.ExeName, FFileCreation);
+      {$IFEND}
+
+      {$IFDEF FRAMEWORK_VCL}
+        FileAge(Application.ExeName, FFileCreation);
+      {$IFEND}
       end;
 
       VerQueryValue(pcBuf, PChar('\VarFileInfo\Translation'),
@@ -227,9 +237,13 @@ end;
 
 procedure TExeInfo.GetVersionInfo;
 begin
+{$IFDEF FRAMEWORK_FMX}
   GetVersionInfoOfApp(ParamStr(0));
+{$IFEND}
+{$IFDEF FRAMEWORK_VCL}
   // VCLonly function
-  // GetVersionInfoOfApp(Application.ExeName);
+  GetVersionInfoOfApp(Application.ExeName);
+{$IFEND}
 end;
 
 function TExeInfo.GetComputerName : String;

@@ -231,13 +231,14 @@ uses
   // FOR scmLoadOptions
   System.IniFiles,
   // FOR Floor
-  System.Math, SCMExeInfo;
+  System.Math, ExeInfo, SCMSimpleConnect, SCMUtility;
 
 {$REGION 'ACTION MANAGER'}
 
 procedure TTimeKeeper.actnConnectExecute(Sender: TObject);
 var
   Thread: TThread;
+  sc: TSimpleConnect;
 begin
   if (Assigned(SCM) and (SCM.scmConnection.Connected = false)) then
   begin
@@ -255,16 +256,16 @@ begin
     Thread := TThread.CreateAnonymousThread(
       procedure
       begin
-        try
-          SCM.SimpleMakeTemporyFDConnection(edtServer.Text, edtUser.Text,
-            edtPassword.Text, chkOsAuthent.IsChecked);
-        finally
-          Timer1.Enabled := false;
-          lblAniIndicatorStatus.Visible := false;
-          AniIndicator1.Enabled := false;
-          AniIndicator1.Visible := false;
-          btnConnect.Enabled := true;
-        end;
+        sc := TSimpleConnect.CreateWithConnection(Self, SCM.scmConnection);
+        sc.DBName := 'SwimClubMeet'; // DEFAULT
+        sc.SimpleMakeTemporyConnection(edtServer.Text, edtUser.Text,
+          edtPassword.Text, chkOsAuthent.IsChecked);
+        Timer1.Enabled := false;
+        lblAniIndicatorStatus.Visible := false;
+        AniIndicator1.Enabled := false;
+        AniIndicator1.Visible := false;
+        btnConnect.Enabled := true;
+        sc.Free
       end);
     Thread.OnTerminate := ConnectOnTerminate;
     Thread.Start;
@@ -680,10 +681,11 @@ begin
         'Connected to SwimClubMeet but not all tables are active!';
   end;
 
+
   // FINAL CHECKS
   if (Assigned(SCM) and (SCM.scmConnection.Connected = false)) then
   begin
-    lblConnectionStatus.Text := 'No connection.';
+    lblConnectionStatus.Text := 'A connection couldn''t be made. (Check you input values.)';
   end;
 
   // Toggles visibility of icons in tabLoginSession.
@@ -771,16 +773,13 @@ begin
 
   // Read last successful connection params and load into controls
   AName := 'Server';
-  SCM.SimpleLoadSettingString(ASection, AName, AValue);
-  edtServer.Text := AValue;
+  edtServer.Text := LoadSharedIniFileSetting(ASection, AName);
   AName := 'User';
-  SCM.SimpleLoadSettingString(ASection, AName, AValue);
-  edtUser.Text := AValue;
+  edtUser.Text := LoadSharedIniFileSetting(ASection, AName);
   AName := 'Password';
-  SCM.SimpleLoadSettingString(ASection, AName, AValue);
-  edtPassword.Text := AValue;
+  edtPassword.Text := LoadSharedIniFileSetting(ASection, AName);
   AName := 'OsAuthent';
-  SCM.SimpleLoadSettingString(ASection, AName, AValue);
+  AValue := LoadSharedIniFileSetting(ASection, AName);
 
   if ((UpperCase(AValue) = 'YES') or (UpperCase(AValue) = 'TRUE')) then
     chkOsAuthent.IsChecked := true
