@@ -12,205 +12,176 @@ uses
   Data.Bind.Components, Data.Bind.DBScope, FMX.Objects, FMX.StdCtrls,
   FMX.ListView, FMX.ListBox, FMX.Edit, FMX.Controls.Presentation,
   FMX.TabControl, FMX.Layouts, dmSCM, System.Character,
-  System.IOUtils, Data.DB, FireDAC.Stan.Param;
+  System.IOUtils, Data.DB, FireDAC.Stan.Param, FMX.EditBox, FMX.SpinBox,
+  ProgramSetting;
 
 type
   TTimeKeeper = class(TForm)
-    ScaledLayout1: TScaledLayout;
-    layTabs: TLayout;
-    TabControl1: TTabControl;
-    tabLoginSession: TTabItem;
-    layLoginToServer: TLayout;
-    layConnectButtons: TLayout;
-    btnConnect: TButton;
-    btnDisconnect: TButton;
-    Label7: TLabel;
-    edtServer: TEdit;
-    Label8: TLabel;
-    edtUser: TEdit;
-    Label12: TLabel;
-    edtPassword: TEdit;
-    chkOsAuthent: TCheckBox;
-    Label18: TLabel;
-    laySelectSession: TLayout;
-    lblSelectSession: TLabel;
-    cmbSessionList: TComboBox;
-    tabEventHeat: TTabItem;
-    layEventHeat: TLayout;
-    ListViewEvent: TListView;
-    ListViewHeat: TListView;
-    layEventHeatTitleBar: TLayout;
-    lblEvent: TLabel;
-    lblHeat: TLabel;
-    tabEntrantRaceTime: TTabItem;
-    layEntrantRaceTime: TLayout;
-    layRaceTime: TLayout;
-    layRaceTimeTitleBar: TLayout;
-    Label3: TLabel;
-    layRaceTimeDetail: TLayout;
-    layRaceTimeEnterTime: TLayout;
-    layRaceTimeEditBox: TLayout;
-    edtRaceTime: TEdit;
-    layRaceTimeText: TLayout;
-    layHeatNumber: TLayout;
-    lblHeatNumber: TLabel;
-    Label2: TLabel;
-    layLane: TLayout;
-    lblLaneNumber: TLabel;
-    txt01: TLabel;
-    layEntrantName: TLayout;
-    lblEntrantName: TLabel;
-    layPersonalBest: TLayout;
-    txt03: TLabel;
-    lblPersonalBest: TLabel;
-    layStoredRaceTime: TLayout;
-    Label5: TLabel;
-    lblRaceTime: TLabel;
-    layTimeToBeat: TLayout;
-    Label9: TLabel;
-    lblTimeToBeat: TLabel;
-    layEntrantList: TLayout;
-    ListViewLane: TListView;
-    layEntrantListTitleBar: TLayout;
-    lblEntrantsHeatNum: TLabel;
-    layFooter: TLayout;
-    SizeGrip1: TSizeGrip;
-    lblConnectionStatus: TLabel;
-    layTopBar: TLayout;
-    layTitle: TLayout;
-    lblSessionTitle: TLabel;
-    lblSwimClubTitle: TLabel;
-    laySummary: TLayout;
-    lblSelectedEntrant: TLabel;
-    lblSelectedEvent: TLabel;
-    layCenteredButtons: TLayout;
-    imgStopWatch: TImage;
-    btnOptions: TButton;
-    btnRefresh: TButton;
-    StyleBook2: TStyleBook;
-    BS_tblSwimClub: TBindSourceDB;
-    BS_qrySession: TBindSourceDB;
-    BS_qryEvent: TBindSourceDB;
-    BS_qryHeat: TBindSourceDB;
-    BindingsList1: TBindingsList;
-    LinkListControlToField2: TLinkListControlToField;
-    LinkListControlToField3: TLinkListControlToField;
-    LinkListControlToField4: TLinkListControlToField;
-    LinkListControlToField1: TLinkListControlToField;
-    LinkPropertyToFieldClubName: TLinkPropertyToField;
-    LinkPropertyToFieldSessionDate: TLinkPropertyToField;
-    LinkPropertyToFieldText: TLinkPropertyToField;
-    LinkPropertyToFieldText3: TLinkPropertyToField;
-    LinkPropertyToFieldText4: TLinkPropertyToField;
-    LinkPropertyToFieldLane: TLinkPropertyToField;
-    LinkPropertyToFieldText6: TLinkPropertyToField;
-    LinkPropertyToFieldText5: TLinkPropertyToField;
-    LinkPropertyToFieldText7: TLinkPropertyToField;
-    LinkPropertyToFieldText8: TLinkPropertyToField;
-    LinkPropertyToFieldText2: TLinkPropertyToField;
-    BS_qryEntrant: TBindSourceDB;
     ActionList1: TActionList;
     actnConnect: TAction;
     actnDisconnect: TAction;
-    actnRefresh: TAction;
     actnPostTime: TAction;
+    actnRefresh: TAction;
     actnSCMOptions: TAction;
-    BS_qryLane: TBindSourceDB;
-    ImageList1: TImageList;
     AniIndicator1: TAniIndicator;
-    lblAniIndicatorStatus: TLabel;
-    Timer1: TTimer;
-    GridPanelLayout1: TGridPanelLayout;
-    btn07: TButton;
-    btn08: TButton;
-    btn09: TButton;
-    btn04: TButton;
-    btn05: TButton;
-    btn06: TButton;
+    BindingsList1: TBindingsList;
+    bsEntrant: TBindSourceDB;
+    bsEvent: TBindSourceDB;
+    bsHeat: TBindSourceDB;
+    bsLane: TBindSourceDB;
+    bsSession: TBindSourceDB;
+    bsSwimClub: TBindSourceDB;
+    btn00: TButton;
     btn01: TButton;
     btn02: TButton;
     btn03: TButton;
-    btn00: TButton;
+    btn04: TButton;
+    btn05: TButton;
+    btn06: TButton;
+    btn07: TButton;
+    btn08: TButton;
+    btn09: TButton;
+    btnConnect: TButton;
+    btnDisconnect: TButton;
     btnPoint: TButton;
+    btnRefresh: TButton;
     btnRTN: TButton;
-    btnBKS: TButton;
+    chkbLockToLane: TCheckBox;
+    chkbSessionVisibility: TCheckBox;
+    chkbUseOsAuthentication: TCheckBox;
+    cmbSessionList: TComboBox;
+    cmbSwimClubList: TComboBox;
+    edtPassword: TEdit;
+    edtRaceTime: TEdit;
+    edtServerName: TEdit;
+    edtUser: TEdit;
+    GridPanelLayout1: TGridPanelLayout;
+    imgBackSpace: TImageControl;
     Label1: TLabel;
-    procedure FormCreate(Sender: TObject);
-    procedure FormDestroy(Sender: TObject);
-    procedure TabControl1Change(Sender: TObject);
+    Label12: TLabel;
+    Label18: TLabel;
+    Label2: TLabel;
+    Label5: TLabel;
+    Label7: TLabel;
+    Label8: TLabel;
+    Label9: TLabel;
+    layConnectButtons: TLayout;
+    layEntrantList: TLayout;
+    layEntrantName: TLayout;
+    layEntrantRaceTime: TLayout;
+    layEventHeat: TLayout;
+    layEventHeatTitleBar: TLayout;
+    layFooter: TLayout;
+    layHeatNumber: TLayout;
+    layLane: TLayout;
+    layLoginToServer: TLayout;
+    layPersonalBest: TLayout;
+    layRaceTime: TLayout;
+    layRaceTimeDetail: TLayout;
+    layRaceTimeEditBox: TLayout;
+    layRaceTimeEnterTime: TLayout;
+    layRaceTimeText: TLayout;
+    layRaceTimeTitleBar: TLayout;
+    laySelectSession: TLayout;
+    layStoredRaceTime: TLayout;
+    layTabs: TLayout;
+    layTimeToBeat: TLayout;
+    lblAniIndicatorStatus: TLabel;
+    lblConnectionStatus: TLabel;
+    lblEntrantName: TLabel;
+    lblEvent: TLabel;
+    lblHeat: TLabel;
+    lblHeatNumber: TLabel;
+    lblLaneNumber: TLabel;
+    lblPersonalBest: TLabel;
+    lblRaceTime: TLabel;
+    lblSelectSession: TLabel;
+    lblSelectSwimClub: TLabel;
+    lblTimeToBeat: TLabel;
+    LinkListControlToField1: TLinkListControlToField;
+    LinkListControlToField2: TLinkListControlToField;
+    LinkListControlToField3: TLinkListControlToField;
+    LinkListControlToField4: TLinkListControlToField;
+    LinkPropertyToFieldLane: TLinkPropertyToField;
+    LinkPropertyToFieldText3: TLinkPropertyToField;
+    LinkPropertyToFieldText5: TLinkPropertyToField;
+    LinkPropertyToFieldText6: TLinkPropertyToField;
+    LinkPropertyToFieldText7: TLinkPropertyToField;
+    LinkPropertyToFieldText8: TLinkPropertyToField;
+    ListViewEvent: TListView;
+    ListViewHeat: TListView;
+    ListViewLane: TListView;
+    ScaledLayout1: TScaledLayout;
+    SizeGrip1: TSizeGrip;
+    spinboxLockToLane: TSpinBox;
+    StyleBook1: TStyleBook;
+    StyleBook2: TStyleBook;
+    TabControl1: TTabControl;
+    tabEntrantRaceTime: TTabItem;
+    tabEventHeat: TTabItem;
+    tabLoginSession: TTabItem;
+    Timer1: TTimer;
+    txt01: TLabel;
+    txt03: TLabel;
     procedure actnConnectExecute(Sender: TObject);
     procedure actnConnectUpdate(Sender: TObject);
     procedure actnDisconnectExecute(Sender: TObject);
     procedure actnDisconnectUpdate(Sender: TObject);
-    procedure actnRefreshExecute(Sender: TObject);
-    procedure actnRefreshUpdate(Sender: TObject);
     procedure actnPostTimeExecute(Sender: TObject);
     procedure actnPostTimeUpdate(Sender: TObject);
-    procedure actnSCMOptionsExecute(Sender: TObject);
-    procedure actnSCMOptionsUpdate(Sender: TObject);
-    procedure ListViewHeatChange(Sender: TObject);
-    procedure ListViewEventChange(Sender: TObject);
-    procedure ListViewLaneChange(Sender: TObject);
-    procedure cmbSessionListChange(Sender: TObject);
-    procedure imgStopWatchClick(Sender: TObject);
-    procedure ListViewHeatDblClick(Sender: TObject);
-    procedure edtRaceTimeEnter(Sender: TObject);
-    procedure edtRaceTimeKeyDown(Sender: TObject; var Key: Word;
-      var KeyChar: Char; Shift: TShiftState);
-    procedure Timer1Timer(Sender: TObject);
-    procedure btn07Click(Sender: TObject);
-    procedure btn08Click(Sender: TObject);
-    procedure btn09Click(Sender: TObject);
-    procedure btn04Click(Sender: TObject);
-    procedure btn05Click(Sender: TObject);
-    procedure btn06Click(Sender: TObject);
+    procedure actnRefreshExecute(Sender: TObject);
+    procedure actnRefreshUpdate(Sender: TObject);
+    procedure BackSpaceClick(Sender: TObject);
+    procedure btn00Click(Sender: TObject);
     procedure btn01Click(Sender: TObject);
     procedure btn02Click(Sender: TObject);
     procedure btn03Click(Sender: TObject);
-    procedure btn00Click(Sender: TObject);
+    procedure btn04Click(Sender: TObject);
+    procedure btn05Click(Sender: TObject);
+    procedure btn06Click(Sender: TObject);
+    procedure btn07Click(Sender: TObject);
+    procedure btn08Click(Sender: TObject);
+    procedure btn09Click(Sender: TObject);
     procedure btnPointClick(Sender: TObject);
-    procedure btnBKSClick(Sender: TObject);
-    procedure LinkPropertyToFieldLaneAssignedValue(Sender: TObject;
-      AssignValueRec: TBindingAssignValueRec; const Value: TValue);
-    procedure LinkPropertyToFieldText4AssignedValue(Sender: TObject;
-      AssignValueRec: TBindingAssignValueRec; const Value: TValue);
-
-  private const
-    SCMCONFIGFILENAME = 'SCMConfig.ini';
-    CONNECTIONTIMEOUT = 48;
-
+    procedure chkbLockToLaneChange(Sender: TObject);
+    procedure chkbSessionVisibilityChange(Sender: TObject);
+    procedure cmbSessionListChange(Sender: TObject);
+    procedure cmbSwimClubListChange(Sender: TObject);
+    procedure edtRaceTimeEnter(Sender: TObject);
+    procedure edtRaceTimeKeyDown(Sender: TObject; var Key: Word;
+      var KeyChar: Char; Shift: TShiftState);
+    procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+    procedure ListViewEventChange(Sender: TObject);
+    procedure ListViewHeatChange(Sender: TObject);
+    procedure ListViewLaneChange(Sender: TObject);
+    procedure TabControl1Change(Sender: TObject);
+    procedure Timer1Timer(Sender: TObject);
   private
-    { Private declarations }
-    fEnableStickyLane: Boolean;
-    fEnableSuperGlue: Boolean;
-    fEnableAutoReFresh: Boolean;
-    fEnableStopwatchServerPost: Boolean;
-    fHideClosedSessions: Boolean;
-    fStickyLane: Integer;
-    fEnableReturnKeyType: Boolean;
+  const
+    CONNECTIONTIMEOUT = 48;
+    SCMCONFIGFILENAME = 'SCMConfig.ini';
+  var
     fConnectionCountdown: Integer;
+    fLoginTimeOut: Integer;
 
-    procedure scmRaceTimePost;
-    procedure ConnectOnTerminate(Sender: TObject);
     procedure btnBKSClickTerminate(Sender: TObject);
+    procedure ConnectOnTerminate(Sender: TObject);
+    function GetSCMVerInfo(): string;
 
-    procedure GetSCMVerInfo();
+    // JSON Program Settings
+    procedure LoadFromSettings;
+    procedure LoadSettings;
+    procedure PostRaceTime;
+    procedure SaveToSettings;
+    procedure Update_Layout;
+    procedure Update_SessionVisibility;
+    procedure Update_TabSheetCaptions;
 
   public
     { Public declarations }
-    procedure scmOptionsLoad;
-    procedure scmRefreshEntrant_Detail;
-    procedure scmRefreshLane;
-
-    procedure scmUpdateTabSheetsImages;
-    procedure scmUpdateHideClosedSessions;
-
-    property StickyLane: Integer read fStickyLane;
-    property EnableStopwatchServerPost: Boolean read fEnableStopwatchServerPost;
-    property EnableStickyLane: Boolean read fEnableStickyLane;
-    property EnableSuperGlue: Boolean read fEnableSuperGlue;
-    property HideClosedsessions: Boolean read fHideClosedSessions;
-
+    procedure Refresh_EntrantRaceTime;
+    procedure Refresh_Lane;
   end;
 
 var
@@ -227,13 +198,11 @@ uses
   // needed to show virtual keyboard in windows 10 32/64bit
   // Shellapi,
 {$ENDIF}
-  dlgSCMOptions, dlgSCMStopWatch,
   // FOR scmLoadOptions
-  System.IniFiles,
+//  System.IniFiles,
   // FOR Floor
   System.Math, ExeInfo, SCMSimpleConnect, SCMUtility;
 
-{$REGION 'ACTION MANAGER'}
 
 procedure TTimeKeeper.actnConnectExecute(Sender: TObject);
 var
@@ -243,7 +212,7 @@ begin
   if (Assigned(SCM) and (SCM.scmConnection.Connected = false)) then
   begin
     lblAniIndicatorStatus.Text := 'Connecting';
-    fConnectionCountdown := CONNECTIONTIMEOUT;
+    fConnectionCountdown := fLoginTimeOut;
     AniIndicator1.Visible := true; // progress timer
     AniIndicator1.Enabled := true; // start spinning
     lblAniIndicatorStatus.Visible := true; // a label with countdown
@@ -256,15 +225,16 @@ begin
     Thread := TThread.CreateAnonymousThread(
       procedure
       begin
+        // can only be assigned if not connected
+        SCM.scmConnection.Params.Values['LoginTimeOut'] :=
+          IntToStr(fLoginTimeOut);
+
         sc := TSimpleConnect.CreateWithConnection(Self, SCM.scmConnection);
         sc.DBName := 'SwimClubMeet'; // DEFAULT
-        sc.SimpleMakeTemporyConnection(edtServer.Text, edtUser.Text,
-          edtPassword.Text, chkOsAuthent.IsChecked);
+        sc.SimpleMakeTemporyConnection(edtServerName.Text, edtUser.Text,
+          edtPassword.Text, chkbUseOsAuthentication.IsChecked);
         Timer1.Enabled := false;
-        lblAniIndicatorStatus.Visible := false;
-        AniIndicator1.Enabled := false;
-        AniIndicator1.Visible := false;
-        btnConnect.Enabled := true;
+        actnConnect.Enabled := true;
         sc.Free
       end);
     Thread.OnTerminate := ConnectOnTerminate;
@@ -275,14 +245,19 @@ end;
 
 procedure TTimeKeeper.actnConnectUpdate(Sender: TObject);
 begin
-  // toggle visibility of Connect button.
+  // verbose code - stop unecessary repaints ...
   if Assigned(SCM) then
-    if SCM.scmConnection.Connected then
-      actnConnect.Visible := false
-    else
-      actnConnect.Visible := true
-  else
-    actnConnect.Visible := true;
+  begin
+    if SCM.scmConnection.Connected and actnConnect.Visible  then
+        actnConnect.Visible := false;
+    if not SCM.scmConnection.Connected and not actnConnect.Visible then
+      actnConnect.Visible := true;
+  end
+  else // D E F A U L T  I N I T  . Data module not created.
+  begin
+    if not actnConnect.Visible then
+      actnConnect.Visible := true;
+  end;
 end;
 
 procedure TTimeKeeper.actnDisconnectExecute(Sender: TObject);
@@ -294,24 +269,32 @@ begin
     SCM.scmConnection.Connected := false;
     lblConnectionStatus.Text := 'No connection.';
   end;
-  // Hides..unhides visibility of icons in tabLoginSession
-  scmUpdateTabSheetsImages;
   AniIndicator1.Visible := false;
   lblAniIndicatorStatus.Visible := false;
   AniIndicator1.Enabled := false;
-
+  SaveToSettings; // As this was a OK connection - store parameters.
+  tabEventHeat.Text := 'Event-Heat';
+  tabEntrantRaceTime.Text := 'Entrant-RaceTime';
+  UpdateAction(actnDisconnect);
+  UpdateAction(actnConnect);
+  Update_Layout;
 end;
 
 procedure TTimeKeeper.actnDisconnectUpdate(Sender: TObject);
 begin
-  // toggle visibility of Disconnect button.
+  // verbose code - stop unecessary repaints ...
   if Assigned(SCM) then
-    if SCM.scmConnection.Connected then
-      actnDisconnect.Visible := true
-    else
-      actnDisconnect.Visible := false
-  else
-    actnDisconnect.Visible := false;
+  begin
+    if SCM.scmConnection.Connected and not actnDisconnect.Visible then
+        actnDisconnect.Visible := true;
+    if not SCM.scmConnection.Connected and actnDisconnect.Visible then
+        actnDisconnect.Visible := false;
+  end
+  else // D E F A U L T  I N I T  . Data module not created.
+  begin
+    if actnDisconnect.Visible then
+      actnDisconnect.Visible := false;
+  end;
 end;
 
 procedure TTimeKeeper.actnPostTimeExecute(Sender: TObject);
@@ -333,14 +316,14 @@ begin
         'Failed to PostTime because the session/heat is locked/closed.';
     end
     else
-      scmRaceTimePost; // routine will post and display a status message
+      PostRaceTime; // routine will post and display a status message
 
     // Update the entrants details.
     // Get the server to ECHO the QUALIFIED STATUS.
     // ie. VISIBLE confirmation that it was POSTED.
     // append a '(Disqualified)' or '(Scratched)' to the
     // FName in the lane listview
-    scmRefreshLane;
+    Refresh_Lane;
   end
 end;
 
@@ -387,7 +370,7 @@ begin
     SCM.LocateEventID(EventID);
     SCM.LocateHeatID(HeatID);
     // performs full ReQuery of lane table.
-    scmRefreshLane;
+    Refresh_Lane;
   end;
   SCM.qryEvent.EnableControls;
   SCM.qryHeat.EnableControls;
@@ -399,83 +382,6 @@ begin
     actnRefresh.Enabled := true
   else
     actnRefresh.Enabled := false;
-end;
-
-// MODAL FORMS IN FireMonkey
-// This topic shows you how to create, configure and display a FireMonkey
-// dialog box. It also shows how to handle its return value using a callback
-// method, and how to free the memory allocated by your modal dialog box
-// after it closes.
-
-// 1. Define a class that takes the TProc__1 interface, and define a function
-// to handle the closing of your dialog box:
-// ---------------------------------------------------------------------------
-// You cannot free the memory allocated for your modal dialog box form within
-// the method than handles the closing of your modal dialog box form.
-// To free your modal dialog box form, you must handle its (the modal dialog
-// box form) OnClose event.
-// WIT:
-// Action = TCloseAction::caFree;
-
-// ---------------------------------------------------------------------------
-
-// 2. Then pass an instance of this class to ShowModal:
-// ---------------------------------------------------------------------------
-
-procedure TTimeKeeper.actnSCMOptionsExecute(Sender: TObject);
-var
-  dlg: TscmOptions;
-begin
-{$IFNDEF ANDROID}
-  dlg := TscmOptions.Create(self);
-  dlg.ShowModal(
-    procedure(ModalResult: TModalResult)
-    begin
-      // ... Do something.
-
-      // Always reload SCM options from the scmConfig.ini file.
-      // There is no CANCEL for this modal form. What ever the user does,
-      // the input values are accepted.
-      scmOptionsLoad;
-      // little status images used on the tabsheets
-      scmUpdateTabSheetsImages;
-      // Update the visibility of closed sessions in qrySession
-      // by modifying it's param HIDECLOSED.
-      // This uses value fHideClosedSessions and is best done after a fresh
-      // read of the scmConfig.ini values.
-      scmUpdateHideClosedSessions;
-      // StickyLane stuff
-      if (Assigned(SCM) and SCM.IsActive) then
-      begin
-        // Sticky Lane Enabled?
-        if (EnableStickyLane) then
-          // cue-to record position in table
-          SCM.LocateLaneNum(StickyLane);
-      end;
-      // update the Enabled state of the ListView LANE
-      actnSCMOptionsUpdate(self);
-    end);
-
-{$ELSE}
-  { TODO : Create an android popup window for options? }
-  // ANDROID platform doesn't do Modal Forms.
-{$ENDIF}
-  (*
-    IMPORTANT NOTE : DIALOGUE IS DESTROYED IN TscmOption.FormClose
-  *)
-end;
-
-procedure TTimeKeeper.actnSCMOptionsUpdate(Sender: TObject);
-begin
-  if (Assigned(SCM) and SCM.IsActive) then
-  begin
-    if (fEnableStickyLane and fEnableSuperGlue) then
-      ListViewLane.Enabled := false
-    else
-      ListViewLane.Enabled := true;
-  end
-  else
-    ListViewLane.Enabled := true;
 end;
 
 procedure TTimeKeeper.btn00Click(Sender: TObject);
@@ -598,7 +504,7 @@ begin
     KeyDown(Key, KeyChar, ShiftState);
 end;
 
-procedure TTimeKeeper.btnBKSClick(Sender: TObject);
+procedure TTimeKeeper.BackSpaceClick(Sender: TObject);
 var
   Key: Word;
   KeyChar: Char;
@@ -646,52 +552,110 @@ begin
     KeyDown(Key, KeyChar, ShiftState);
 end;
 
+procedure TTimeKeeper.chkbLockToLaneChange(Sender: TObject);
+begin
+  // TODO ....
+//  if (Assigned(SCM) and SCM.scmConnection.Connected) then
+//    Update_LockToLane();
+end;
+
+procedure TTimeKeeper.chkbSessionVisibilityChange(Sender: TObject);
+begin
+  if (Assigned(SCM) and SCM.scmConnection.Connected) then
+    Update_SessionVisibility();
+end;
+
 procedure TTimeKeeper.cmbSessionListChange(Sender: TObject);
 begin
-  // clean the statusbar
-  lblConnectionStatus.Text := '';
+  if Assigned(SCM) and SCM.scmConnection.Connected then
+  begin
+    if SCM.IsActive then
+    begin
+      bsEvent.DataSet.First;
+      bsHeat.DataSet.First;
+    end;
+    Update_TabSheetCaptions;
+  end;
+end;
+
+procedure TTimeKeeper.cmbSwimClubListChange(Sender: TObject);
+begin
+  if Assigned(SCM) and SCM.scmConnection.Connected then
+  begin
+    if SCM.IsActive then
+    begin
+      bsSession.DataSet.First;
+      bsEvent.DataSet.First;
+      bsHeat.DataSet.First;
+    end;
+    Update_TabSheetCaptions;
+  end;
 end;
 
 procedure TTimeKeeper.ConnectOnTerminate(Sender: TObject);
 begin
+
+  lblAniIndicatorStatus.Visible := false;
+  AniIndicator1.Enabled := false;
+  AniIndicator1.Visible := false;
+
   if TThread(Sender).FatalException <> nil then
   begin
     // something went wrong
     // Exit;
   end;
 
-  // Tidy-up display
-  // lblAniIndicatorStatus.Visible := false;
-  // AniIndicator1.Enabled := false;
-  // AniIndicator1.Visible := false;
+  if not Assigned(SCM) then exit;
 
-  // Make tables active
+  // C O N N E C T E D  .
   if (SCM.scmConnection.Connected) then
   begin
     SCM.ActivateTable;
     // ALL TABLES SUCCESSFULLY MADE ACTIVE ...
     if (SCM.IsActive = true) then
     begin
-      lblConnectionStatus.Text := 'Connected to SwimClubMeet.';
-      // TODO: FIRST TIME INIT
-      scmRefreshLane;
-    end
-    else
-      lblConnectionStatus.Text :=
-        'Connected to SwimClubMeet but not all tables are active!';
+      // Set the visibility of closed sessions.
+      Update_SessionVisibility;
+      // I N I T   L A N E   L I S T .
+      Refresh_Lane;
+    end;
+    // STATUS BAR CAPTION.
+    lblConnectionStatus.Text := 'Connected to SwimClubMeet. ';
+    lblConnectionStatus.Text := lblConnectionStatus.Text + GetSCMVerInfo();
+    lblConnectionStatus.Text := lblConnectionStatus.Text + sLineBreak +
+      bsSwimClub.DataSet.FieldByName('Caption').AsString;
   end;
 
-
-  // FINAL CHECKS
-  if (Assigned(SCM) and (SCM.scmConnection.Connected = false)) then
+  // VERY SICK OF BIND COMPONETS BREAKING!
+  if Assigned(SCM) and SCM.IsActive then
   begin
-    lblConnectionStatus.Text := 'A connection couldn''t be made. (Check you input values.)';
+    if not Assigned(bsSwimClub.DataSet) then
+      bsSwimClub.DataSet := SCM.tblSwimClub;
+    if not Assigned(bsSession.DataSet) then
+      bsSession.DataSet := SCM.qrySession;
+    if not Assigned(bsEvent.DataSet) then
+      bsEvent.DataSet := SCM.qryEvent;
+    if not Assigned(bsHeat.DataSet) then
+      bsHeat.DataSet := SCM.qryHeat;
+    if not Assigned(bsEntrant.DataSet) then
+      bsEntrant.DataSet := SCM.qryEntrant;
+    if not Assigned(bsLane.DataSet) then
+      bsLane.DataSet := SCM.qryLane;
   end;
 
-  // Toggles visibility of icons in tabLoginSession.
-  scmUpdateTabSheetsImages;
-  // Label showing application and database version
-  GetSCMVerInfo;
+  if not SCM.scmConnection.Connected then
+  begin
+    // Attempt to connect failed.
+    lblConnectionStatus.Text :=
+      'A connection couldn''t be made. (Check you input values.)';
+  end;
+
+  // Disconnect button vivibility
+  UpdateAction(actnDisconnect);
+  // Connect button vivibility
+  UpdateAction(actnConnect);
+  // Display of layout panels (holding TListView grids).
+  Update_Layout;
 
 end;
 
@@ -748,266 +712,124 @@ var
 begin
   // Initialization of params.
   application.ShowHint := true;
-  ASection := 'MSSQL_SwimClubMeet';
   AniIndicator1.Visible := false;
   AniIndicator1.Enabled := false;
   btnDisconnect.Visible := false;
-  fConnectionCountdown := CONNECTIONTIMEOUT;
   Timer1.Enabled := false;
   lblAniIndicatorStatus.Visible := false;
-
-  // note cmbSessionList.Clear doesn't work here.
   cmbSessionList.Items.Clear;
+  chkbSessionVisibility.IsChecked := true;
+  fLoginTimeOut := CONNECTIONTIMEOUT;
+  fConnectionCountdown := fLoginTimeOut;
+  chkbLockToLane.IsChecked := false;
 
-  // clean-up the top bar captions
-  lblSwimClubTitle.Text := String.Empty;
-  lblSessionTitle.Text := String.Empty;
-  lblSelectedEvent.Text := String.Empty;
-  lblSelectedEntrant.Text := String.Empty;
+   // A Class that uses JSON to read and write application configuration
+  if Settings = nil then
+    Settings := TPrgSetting.Create;
 
-  // clean-up TabSheet3
-  lblEntrantsHeatNum.Text := 'Entrants ...';
+  // C R E A T E   T H E   D A T A M O D U L E .
+  if NOT Assigned(SCM) then
+    SCM := TSCM.Create(Self);
+  if SCM.scmConnection.Connected then
+    SCM.scmConnection.Connected := false;
 
-  // ON CREATION SETS - SCM->scmConnection->Active = false;
-  SCM := TSCM.Create(self);
+   // READ APPLICATION   C O N F I G U R A T I O N   PARAMS.
+  // JSON connection settings. Windows location :
+  // %SYSTEMDRIVE\%%USER%\%USERNAME%\AppData\Roaming\Artanemus\SwimClubMeet
+  LoadSettings;
 
-  // Read last successful connection params and load into controls
-  AName := 'Server';
-  edtServer.Text := LoadSharedIniFileSetting(ASection, AName);
-  AName := 'User';
-  edtUser.Text := LoadSharedIniFileSetting(ASection, AName);
-  AName := 'Password';
-  edtPassword.Text := LoadSharedIniFileSetting(ASection, AName);
-  AName := 'OsAuthent';
-  AValue := LoadSharedIniFileSetting(ASection, AName);
+   // TAB_SHEET : DEFAULT: Login-Session
+  TabControl1.TabIndex := 0;
 
-  if ((UpperCase(AValue) = 'YES') or (UpperCase(AValue) = 'TRUE')) then
-    chkOsAuthent.IsChecked := true
-  else
-    chkOsAuthent.IsChecked := false;
+  Update_Layout;
 
   // Connection status - located in footer bar.
-  lblConnectionStatus.Text := '';
+  lblConnectionStatus.Text := 'NOT CONNECTED';
 
-  // Login-Session
-  TabControl1.TabIndex := 0;
-  // read all the sticky tacky stuff
-  scmOptionsLoad;
-  // update the images to use in each tabsheet
-  scmUpdateTabSheetsImages;
-  // Update the visibility of closed sessions in qrySession
-  // by modifying it's param HIDECLOSED.
-  // This uses value fHideClosedSessions and is best done after a fresh
-  // read of the scmConfig.ini values.
-  scmUpdateHideClosedSessions;
-  // TIDY ALL TLISTVIEW DISPLAYS - (fixes TViewListLane)
-  // on startup SCM will be set to disconnected.
-  if Assigned(SCM) then
-    SCM.DeActivateTable;
-
-  // Hide controls used by entrant details
-  scmRefreshEntrant_Detail;
 end;
 
 procedure TTimeKeeper.FormDestroy(Sender: TObject);
 begin
-  // IF DATA-MODULE EXISTS ... break the current connection.
   if Assigned(SCM) then
   begin
-    SCM.DeActivateTable;
-    SCM.scmConnection.Connected := false;
+    if SCM.scmConnection.Connected then
+    begin
+      SaveToSettings;
+      SCM.scmConnection.Connected := false;
+    end;
+    SCM.Free;
   end;
-  // CLEAN MEMORY
-  SCM.Free;
 end;
 
-procedure TTimeKeeper.GetSCMVerInfo;
+function TTimeKeeper.GetSCMVerInfo(): string;
 {$IF defined(MSWINDOWS)}
 var
   myExeInfo: TExeInfo;
 {$ENDIF}
 begin
+  result := '';
   // if connected - display the application version
   // and the SwimClubMeet database version.
   if Assigned(SCM) then
     if SCM.scmConnection.Connected then
-      Label1.Text := 'DB v' + SCM.GetDBVerInfo
-    else
-      Label1.Text := '';
-
+      result := 'DB v' + SCM.GetDBVerInfo;
 {$IF defined(MSWINDOWS)}
   // get the application version number
-  myExeInfo := TExeInfo.Create(self);
-  Label1.Text := 'App v' + myExeInfo.FileVersion + ' - ' +
-    Label1.Text;
+  myExeInfo := TExeInfo.Create(Self);
+  result := 'App v' + myExeInfo.FileVersion + ' - ' + result;
   myExeInfo.Free;
-
 {$ENDIF}
-end;
-
-procedure TTimeKeeper.imgStopWatchClick(Sender: TObject);
-var
-  dlg: TscmStopWatch;
-begin
-{$IFNDEF ANDROID}
-  dlg := TscmStopWatch.Create(self);
-  dlg.ShowModal(
-    procedure(ModalResult: TModalResult)
-    begin
-      // Do something.
-      if (ModalResult = mrOk) then
-      begin
-        if (EnableStopwatchServerPost) then
-        begin
-          // CLEAR ANY TEXT
-          edtRaceTime.Text := '';
-          if (Assigned(SCM) and SCM.IsActive) then
-          begin
-            // POST RACETIME
-            SCM.qryEntrant.DisableControls;
-            SCM.qryEntrant.Edit;
-            SCM.qryEntrant.FieldByName('RaceTime').AsDateTime := dlg.RaceTime;
-            SCM.qryEntrant.Post;
-            SCM.qryEntrant.EnableControls;
-
-            // updates the label lblRaceTime
-            // this will indicate to the use that the value
-            // was successfully into the database ...
-            scmRefreshLane;
-            lblConnectionStatus.Text :=
-              'INFO: The RaceTime was successfully posted.';
-          end
-          else
-          begin
-            lblConnectionStatus.Text :=
-              'ERROR: The RaceTime wasn''t posted. No Connection.';
-          end;
-        end
-        else
-          // default : send RaceTime to edtTime
-          edtRaceTime.Text := FormatDateTime('nn:ss.zzz', dlg.RaceTime);
-      end;
-    end);
-
-{$ELSE}
-  { TODO : Create an android popup window for options? }
-  // ANDROID platform doesn't do Modal Forms.
-{$ENDIF}
-  (*
-    IMPORTANT NOTE DIALOGUE IS DESTROYED IN TscmStopWatch.FormClose
-  *)
-end;
-
-procedure TTimeKeeper.LinkPropertyToFieldLaneAssignedValue(Sender: TObject;
-AssignValueRec: TBindingAssignValueRec; const Value: TValue);
-var
-  v: string;
-begin
-  // if there is no entrant then lane number is blank
-  // use the lane number given in qryLane
-  v := Value.AsString;
-  if (v.IsEmpty) then
-  begin
-    if (Assigned(SCM) and SCM.IsActive) then
-      lblLaneNumber.Text := SCM.qryLane.FieldByName('LaneNum').AsString
-    else
-      lblEntrantsHeatNum.Text := '';
-  end;
-end;
-
-procedure TTimeKeeper.LinkPropertyToFieldText4AssignedValue(Sender: TObject;
-AssignValueRec: TBindingAssignValueRec; const Value: TValue);
-var
-  v: string;
-begin
-  // If there are no heats ... the Value points to an empty string.
-  // Assign a corrected caption above the ListView Entrants.
-  // NOTE: Custom Binding Default is "Entrants.. " + %s
-  v := Value.AsString;
-  if (v.IsEmpty) then
-    lblEntrantsHeatNum.Text := 'Entrants ...'
 end;
 
 procedure TTimeKeeper.ListViewEventChange(Sender: TObject);
 begin
-  // clean the statusbar
-  lblConnectionStatus.Text := '';
+  Update_TabSheetCaptions;
 end;
 
 procedure TTimeKeeper.ListViewHeatChange(Sender: TObject);
 begin
-  if (SCM.qryHeat.FieldByName('HeatStatusID').AsInteger <> 1) then
-    lblConnectionStatus.Text :=
-      'INFO: The heat is raced or closed. Posting is disabled.'
-  else
-    lblConnectionStatus.Text := '';
-  if SCM.qryLane.IsEmpty then
-    ListViewLane.Items.Clear;
-  // CLEAR TEXT
-  edtRaceTime.Text := '';
-
-end;
-
-procedure TTimeKeeper.ListViewHeatDblClick(Sender: TObject);
-begin
-  // move to tabsheet 2 (LANE-ENTRANT)
-  TabControl1.TabIndex := 2;
+  Update_TabSheetCaptions;
 end;
 
 procedure TTimeKeeper.ListViewLaneChange(Sender: TObject);
 begin
-  // NOTE:
-  // qryEntrant is parented to qryLane
-  // qryEntrant will be empty if the qryLane.EntrantID is NULL
-  scmRefreshEntrant_Detail;
-  // ASSERT the button state
-  actnPostTimeUpdate(self);
-  // clean the statusbar
-  lblConnectionStatus.Text := '';
-  application.ProcessMessages;
-  // Is there a swimmer assigned to the lane?
-  if not(SCM.qryLane.FieldByName('EntrantID').IsNull) then
-  begin
-    if edtRaceTime.CanFocus then
-      edtRaceTime.SetFocus;
-  end;
+  Refresh_EntrantRaceTime;
+  // TODO.
+  // -----------------------------------------
+  //
+  // -----------------------------------------
+  // ASSERT button state
+  UpdateAction(actnPostTime);
+  Update_TabSheetCaptions;
 end;
 
-{$ENDREGION}
-{$REGION 'User Declarations' }
-
-procedure TTimeKeeper.scmOptionsLoad;
-var
-  ini: TIniFile;
-  Section: String;
+procedure TTimeKeeper.LoadFromSettings;
 begin
-  { TODO : Add MarshallOptions in section. Include Marshal options in scmConfig.ini }
-  Section := 'TimeKeeperOptions';
-  ini := TIniFile.Create(TPath.GetDocumentsPath + PathDelim +
-    SCMCONFIGFILENAME);
-  try
-    fEnableStickyLane := ini.ReadBool(Section, 'EnableStickyLane', false);
-    fStickyLane := ini.ReadInteger(Section, 'StickyLane', 1);
-    fEnableSuperGlue := ini.ReadBool(Section, 'EnableSuperGlue', false);
-    fEnableAutoReFresh := ini.ReadBool(Section, 'EnableAutoReFresh', false);
-    fEnableStopwatchServerPost := ini.ReadBool(Section,
-      'EnableStopwatchServerPost', false);
-    fHideClosedSessions := ini.ReadBool(Section, 'HideClosedSessions', true);
-    fEnableReturnKeyType := ini.ReadBool(Section, 'EnableReturnKeyType', true);
-
-    if fEnableReturnKeyType then
-      edtRaceTime.ReturnKeyType := TReturnKeyType.Done
-    else
-      edtRaceTime.ReturnKeyType := TReturnKeyType.Default;
-
-  finally
-    ini.Free;
-  end;
-
+  edtServerName.Text := Settings.Server;
+  edtUser.Text := Settings.User;
+  edtPassword.Text := Settings.Password;
+  chkbUseOSAuthentication.IsChecked := Settings.OSAuthent;
+  chkbSessionVisibility.IsChecked := Settings.SessionVisibility;
+  chkbLockToLane.IsChecked := Settings.LockToLane;
+  fLoginTimeOut := Settings.LoginTimeOut;
 end;
 
+procedure TTimeKeeper.LoadSettings;
+begin
+  if Settings = nil then
+    Settings := TPrgSetting.Create;
 
-procedure TTimeKeeper.scmRaceTimePost;
+  if not FileExists(Settings.GetDefaultSettingsFilename()) then
+  begin
+    ForceDirectories(Settings.GetSettingsFolder());
+    Settings.SaveToFile();
+  end;
+
+  Settings.LoadFromFile();
+  LoadFromSettings();
+end;
+
+procedure TTimeKeeper.PostRaceTime;
 var
   s, s1, s2: String;
   i, pos, len: Integer;
@@ -1105,7 +927,7 @@ begin
               // updates the label lblRaceTime
               // this will indicate to the use that the value
               // was successfully into the database ...
-              scmRefreshEntrant_Detail;
+              Refresh_EntrantRaceTime;
 {$IFDEF MSWINDOWS}
               MessageBeep(MB_ICONINFORMATION);
 {$ENDIF}
@@ -1141,7 +963,7 @@ begin
   end;
 end;
 
-procedure TTimeKeeper.scmRefreshEntrant_Detail;
+procedure TTimeKeeper.Refresh_EntrantRaceTime;
 var
   EntrantID, HeatID: Integer;
 begin
@@ -1206,9 +1028,9 @@ begin
     end;
 
     // stick to a single swimming lane.
-    if (fEnableStickyLane) then
+    if (chkbLockToLane.IsChecked) then
     begin
-      SCM.LocateLaneNum(fStickyLane);
+      SCM.LocateLaneNum(Round(spinboxLockToLane.Value));
       // update the entrant param
       EntrantID := SCM.qryLane.FieldByName('EntrantID').AsInteger;
       // SAFE: ZERO values.
@@ -1223,7 +1045,7 @@ begin
   end;
 end;
 
-procedure TTimeKeeper.scmRefreshLane;
+procedure TTimeKeeper.Refresh_Lane;
 var
   LaneNum: Integer;
 begin
@@ -1248,19 +1070,56 @@ begin
     SCM.qryEntrant.EnableControls;
   end;
   // NOTE: qryEntrant is parented to qryLane but need re-painting.
-  scmRefreshEntrant_Detail;
+  Refresh_EntrantRaceTime;
 end;
 
-// procedure TTimeKeeper.scmRefreshEntrantRaceTime;
-//
-// begin
-// if (Assigned(SCM) and SCM.IsActive) then
-// begin
-// scmRefreshEntrant_Detail;
-// end;
-// end;
+procedure TTimeKeeper.SaveToSettings;
+begin
+  Settings.Server := edtServerName.Text;
+  Settings.User := edtUser.Text;
+  Settings.Password := edtPassword.Text;
+  if chkbUseOSAuthentication.IsChecked then
+    Settings.OSAuthent := true
+  else
+    Settings.OSAuthent := false;
+  Settings.SessionVisibility := chkbSessionVisibility.IsChecked;
+  Settings.LockToLane := chkbLockToLane.IsChecked;
+  Settings.LoginTimeOut := fLoginTimeOut;
+  Settings.SaveToFile;
+end;
 
-procedure TTimeKeeper.scmUpdateHideClosedSessions;
+procedure TTimeKeeper.Update_Layout;
+begin
+  if Assigned(SCM) then
+  begin
+    if SCM.scmConnection.Connected then
+    begin
+      // S H O W  the Event, Heat, Lane and Entrant lists
+      if not layEventHeat.Visible then
+        layEventHeat.Visible := true;
+      if not layEntrantRaceTime.Visible then
+        layEntrantRaceTime.Visible := true;
+    end
+    else
+    begin
+      // H I D E .
+      if layEventHeat.Visible then
+        layEventHeat.Visible := false;
+      if layEntrantRaceTime.Visible then
+        layEntrantRaceTime.Visible := false;
+    end;
+  end
+  else
+  begin
+    // D E F A U L T   I N I T  - H I D E .
+    if layEventHeat.Visible then
+      layEventHeat.Visible := false;
+    if layEntrantRaceTime.Visible then
+      layEntrantRaceTime.Visible := false;
+  end;
+end;
+
+procedure TTimeKeeper.Update_SessionVisibility;
 begin
   if Assigned(SCM) and SCM.qrySession.Active then
   begin
@@ -1270,7 +1129,7 @@ begin
     cmbSessionList.Items.Clear;
     SCM.qrySession.Close;
     // ASSIGN PARAM to display or hide CLOSED sessions
-    SCM.qrySession.ParamByName('HIDECLOSED').AsBoolean := fHideClosedSessions;
+    SCM.qrySession.ParamByName('HIDECLOSED').AsBoolean := chkbSessionVisibility.IsChecked;
     SCM.qrySession.Prepare;
     SCM.qrySession.Open;
     SCM.qrySession.EnableControls
@@ -1281,62 +1140,61 @@ begin
   begin
     // qrySession ISN'T ACTIVE ....
     // update state of qryLane PARAM
-    SCM.qrySession.ParamByName('HIDECLOSED').AsBoolean := fHideClosedSessions;
+    SCM.qrySession.ParamByName('HIDECLOSED').AsBoolean := chkbSessionVisibility.IsChecked;
   end;
 
 end;
 
-procedure TTimeKeeper.scmUpdateTabSheetsImages;
+procedure TTimeKeeper.Update_TabSheetCaptions;
 begin
-  // Update image indicators in the tabsheets.
-  if (Assigned(SCM) and SCM.IsActive) then
+  if Assigned(SCM) and SCM.scmConnection.Connected then
   begin
-    if (fEnableStickyLane) then
+    // T A B   S H E E T  C A P T I O N .
+    // E V E N T   . .   H E A T .
+    if bsEvent.DataSet.IsEmpty then
+      tabEventHeat.Text := 'Empty'
+    else
     begin
-      if (fEnableSuperGlue) then
-        // small red pin on tabsheet
-        tabEntrantRaceTime.ImageIndex := 1
-      else
-        // small white pin on tabsheet
-        tabEntrantRaceTime.ImageIndex := 0
+      tabEventHeat.Text := 'Event.' + bsEvent.DataSet.FieldByName
+        ('EventNum').AsString;
+      if not bsHeat.DataSet.IsEmpty then
+        tabEventHeat.Text := tabEventHeat.Text + '-';
+      if not bsHeat.DataSet.IsEmpty and not bsHeat.DataSet.FieldByName
+        ('HeatNum').IsNull then
+        tabEventHeat.Text := tabEventHeat.Text + 'Heat.' +
+          bsHeat.DataSet.FieldByName('HeatNum').AsString;
     end;
 
-    if (fHideClosedSessions) then
-      tabLoginSession.ImageIndex := 3
+    // S T A T U S   L I N E .
+    if (bsHeat.DataSet.FieldByName('HeatStatusID').AsInteger <> 1) then
+      lblConnectionStatus.Text := 'INFO: The heat is raced or closed.'
     else
-      tabLoginSession.ImageIndex := 2;
-
-    if (fEnableAutoReFresh) then
-      tabEventHeat.ImageIndex := 4
-    else
-      tabEventHeat.ImageIndex := -1;
+      // E V E N T   D E S C R I P T I O  N  .
+      // Distance Stroke, NOM and ENT count ....
+      lblConnectionStatus.Text := bsEvent.DataSet.FieldByName
+        ('ListDetailStr').AsString;
   end
-  // Not connect - hide all
   else
   begin
-    tabEntrantRaceTime.ImageIndex := -1;
-    tabLoginSession.ImageIndex := -1;
-    tabEventHeat.ImageIndex := -1;
+    lblConnectionStatus.Text := '';
+    tabEventHeat.Text := 'Event-Heat';
+    tabEntrantRaceTime.Text := 'Entrant-RaceTime';
   end;
-end;
 
-{$ENDREGION}
+end;
 
 procedure TTimeKeeper.TabControl1Change(Sender: TObject);
 begin
   case TabControl1.TabIndex of
     0:
       lblConnectionStatus.Text := '';
-
-    // each time EVENT..HEAT tabsheet is selected ... refresh data
-    1:
-      if (fEnableAutoReFresh) then
-        actnRefreshExecute(self);
-    // Sticky Lane Enabled?
     2:
       begin
         lblConnectionStatus.Text := '';
-        scmRefreshLane;
+        Refresh_Lane;
+        // TODO
+        // Big buttons are NOT DATA-AWARE. Refresh 'QUALIFICATION STATUS'
+//        Refresh_BigButtons;
       end;
   end;
 end;

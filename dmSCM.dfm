@@ -23,7 +23,6 @@ object SCM: TSCM
       FieldName = 'SwimClubID'
       Origin = 'SwimClubID'
       ProviderFlags = [pfInWhere, pfInKey]
-      ReadOnly = True
     end
     object tblSwimClubCaption: TWideStringField
       FieldName = 'Caption'
@@ -184,7 +183,6 @@ object SCM: TSCM
       FieldName = 'EntrantID'
       Origin = 'EntrantID'
       ProviderFlags = [pfInWhere, pfInKey]
-      ReadOnly = True
     end
     object qryEntrantHeatID: TIntegerField
       FieldName = 'HeatID'
@@ -314,7 +312,6 @@ object SCM: TSCM
       FieldName = 'SessionID'
       Origin = 'SessionID'
       ProviderFlags = [pfInWhere, pfInKey]
-      ReadOnly = True
     end
     object qrySessionSessionStart: TSQLTimeStampField
       FieldName = 'SessionStart'
@@ -396,7 +393,6 @@ object SCM: TSCM
       FieldName = 'HeatID'
       Origin = 'HeatID'
       ProviderFlags = [pfInWhere, pfInKey]
-      ReadOnly = True
     end
     object qryHeatHeatNum: TIntegerField
       FieldName = 'HeatNum'
@@ -506,7 +502,6 @@ object SCM: TSCM
       FieldName = 'EventID'
       Origin = 'EventID'
       ProviderFlags = [pfInWhere, pfInKey]
-      ReadOnly = True
     end
     object qryEventEventNum: TIntegerField
       FieldName = 'EventNum'
@@ -686,7 +681,6 @@ object SCM: TSCM
     object qryLaneEntrantID: TFDAutoIncField
       FieldName = 'EntrantID'
       Origin = 'EntrantID'
-      ReadOnly = True
     end
     object qryLaneLane: TIntegerField
       FieldName = 'Lane'
@@ -695,7 +689,6 @@ object SCM: TSCM
     object qryLaneHeatID: TFDAutoIncField
       FieldName = 'HeatID'
       Origin = 'HeatID'
-      ReadOnly = True
     end
     object qryLaneHeatNum: TIntegerField
       FieldName = 'HeatNum'
@@ -725,12 +718,12 @@ object SCM: TSCM
       'USE SwimClubMeet;'
       ''
       'SELECT * FROM SCMSystem WHERE SCMSystemID = 1;')
-    Left = 360
-    Top = 288
+    Left = 264
+    Top = 224
   end
   object dsSCMSystem: TDataSource
     DataSet = qrySCMSystem
-    Left = 360
-    Top = 344
+    Left = 264
+    Top = 280
   end
 end

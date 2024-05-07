@@ -5,11 +5,12 @@ uses
   FMX.Forms,
   frmTimeKeeper in 'frmTimeKeeper.pas' {TimeKeeper},
   dmSCM in 'dmSCM.pas' {SCM: TDataModule},
-  dlgSCMOptions in 'dlgSCMOptions.pas' {scmOptions},
-  dlgSCMStopWatch in 'dlgSCMStopWatch.pas' {scmStopWatch},
   exeinfo in '..\SCM_SHARED\exeinfo.pas',
   SCMSimpleConnect in '..\SCM_SHARED\SCMSimpleConnect.pas',
-  SCMUtility in '..\SCM_SHARED\SCMUtility.pas';
+  SCMUtility in '..\SCM_SHARED\SCMUtility.pas',
+  ProgramSetting in 'ProgramSetting.pas',
+  XSuperJSON in '..\x-superobject\XSuperJSON.pas',
+  XSuperObject in '..\x-superobject\XSuperObject.pas';
 
 {$R *.res}
 
