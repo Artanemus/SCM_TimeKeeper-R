@@ -33,6 +33,49 @@ type
     dsHeat: TDataSource;
     dsMember: TDataSource;
     qryEntrant: TFDQuery;
+    dsEntrant: TDataSource;
+    qrySession: TFDQuery;
+    qrySessionSessionID: TFDAutoIncField;
+    qrySessionSessionStart: TSQLTimeStampField;
+    qrySessionSwimClubID: TIntegerField;
+    qrySessionSessionStatusID: TIntegerField;
+    qrySessionSessionStatusStr: TStringField;
+    qrySessionCaption: TWideStringField;
+    qrySessionSessionStartStr: TWideStringField;
+    qrySessionSessionDetailStr: TWideStringField;
+    qryHeat: TFDQuery;
+    qryEvent: TFDQuery;
+    qryEventEventID: TFDAutoIncField;
+    qryEventEventNum: TIntegerField;
+    qryEventNomineeCount: TIntegerField;
+    qryEventEntrantCount: TIntegerField;
+    qryEventSessionID: TIntegerField;
+    qryEventStrokeID: TIntegerField;
+    qryEventDistanceID: TIntegerField;
+    qryEventEventStatusID: TIntegerField;
+    qryEventListTextStr: TWideStringField;
+    qryEventListDetailStr: TWideStringField;
+    qryMember: TFDQuery;
+    qryLane: TFDQuery;
+    dsLane: TDataSource;
+    qrySCMSystem: TFDQuery;
+    dsSCMSystem: TDataSource;
+    qryHeatHeatID: TFDAutoIncField;
+    qryHeatHeatNum: TIntegerField;
+    qryHeatEventID: TIntegerField;
+    qryHeatHeatTypeID: TIntegerField;
+    qryHeatHeatStatusID: TIntegerField;
+    qryHeatListDetailStr: TWideStringField;
+    qryHeatHeatNumStr: TStringField;
+    qryHeatListTextStr: TStringField;
+    qryLaneLaneID: TIntegerField;
+    qryLaneLaneNum: TIntegerField;
+    qryLaneEntrantID: TFDAutoIncField;
+    qryLaneLane: TIntegerField;
+    qryLaneHeatID: TFDAutoIncField;
+    qryLaneHeatNum: TIntegerField;
+    qryLaneEventID: TIntegerField;
+    qryLaneFName: TWideStringField;
     qryEntrantEntrantID: TFDAutoIncField;
     qryEntrantHeatID: TIntegerField;
     qryEntrantHeatNum: TIntegerField;
@@ -46,50 +89,28 @@ type
     qryEntrantPersonalBestStr: TWideStringField;
     qryEntrantRaceTimeStr: TWideStringField;
     qryEntrantFNameStr: TWideStringField;
+    qryEntrantQualifiedStatus: TStringField;
     qryEntrantHeatNumLaneFNameStr: TWideStringField;
-    dsEntrant: TDataSource;
-    qrySession: TFDQuery;
-    qrySessionSessionID: TFDAutoIncField;
-    qrySessionSessionStart: TSQLTimeStampField;
-    qrySessionSwimClubID: TIntegerField;
-    qrySessionSessionStatusID: TIntegerField;
-    qrySessionSessionStatusStr: TStringField;
-    qrySessionCaption: TWideStringField;
-    qrySessionSessionStartStr: TWideStringField;
-    qrySessionSessionDetailStr: TWideStringField;
-    qryHeat: TFDQuery;
-    qryHeatHeatID: TFDAutoIncField;
-    qryHeatHeatNum: TIntegerField;
-    qryHeatEventID: TIntegerField;
-    qryHeatHeatTypeID: TIntegerField;
-    qryHeatHeatStatusID: TIntegerField;
-    qryHeatListDetailStr: TWideStringField;
-    qryHeatListTextStr: TStringField;
-    qryEvent: TFDQuery;
-    qryEventEventID: TFDAutoIncField;
-    qryEventEventNum: TIntegerField;
-    qryEventNomineeCount: TIntegerField;
-    qryEventEntrantCount: TIntegerField;
-    qryEventSessionID: TIntegerField;
-    qryEventEventTypeID: TIntegerField;
-    qryEventStrokeID: TIntegerField;
-    qryEventDistanceID: TIntegerField;
-    qryEventEventStatusID: TIntegerField;
-    qryEventListTextStr: TWideStringField;
-    qryEventListDetailStr: TWideStringField;
-    qryMember: TFDQuery;
-    qryLane: TFDQuery;
-    qryLaneLaneID: TIntegerField;
-    qryLaneLaneNum: TIntegerField;
-    qryLaneEntrantID: TFDAutoIncField;
-    qryLaneLane: TIntegerField;
-    qryLaneHeatID: TFDAutoIncField;
-    qryLaneHeatNum: TIntegerField;
-    qryLaneEventID: TIntegerField;
-    qryLaneFName: TWideStringField;
-    dsLane: TDataSource;
-    qrySCMSystem: TFDQuery;
-    dsSCMSystem: TDataSource;
+    qryEntrantLastNameStr: TWideStringField;
+    qryEntrantDisqualifyCodeID: TIntegerField;
+    qryEntrantABREV: TWideStringField;
+    qryMemberMemberID: TFDAutoIncField;
+    qryMemberMembershipNum: TIntegerField;
+    qryMemberMembershipStr: TWideStringField;
+    qryMemberFirstName: TWideStringField;
+    qryMemberLastName: TWideStringField;
+    qryMemberDOB: TSQLTimeStampField;
+    qryMemberIsActive: TBooleanField;
+    qryMemberEmail: TWideStringField;
+    qryMemberEnableEmailOut: TBooleanField;
+    qryMemberGenderID: TIntegerField;
+    qryMemberSwimClubID: TIntegerField;
+    qryMemberFName: TWideStringField;
+    qrySCMSystemSCMSystemID: TFDAutoIncField;
+    qrySCMSystemDBVersion: TIntegerField;
+    qrySCMSystemMajor: TIntegerField;
+    qrySCMSystemMinor: TIntegerField;
+    qrySCMSystemBuild: TIntegerField;
     procedure qryHeatAfterScroll(DataSet: TDataSet);
     procedure DataModuleCreate(Sender: TObject);
 
@@ -117,13 +138,7 @@ type
     function LocateLaneID(LaneID: Integer): Boolean;
     //
     function GetDBVerInfo: string;
-
     procedure FilterClosedSessions(HideClosedSessions: Boolean);
-//    procedure SimpleMakeTemporyFDConnection(Server, User, Password: String;
-//      OsAuthent: Boolean);
-//    procedure SimpleSaveSettingString(ASection, AName, AValue: String);
-//    procedure SimpleLoadSettingString(ASection, AName: String; var AValue: String);
-
     property IsActive: Boolean read FIsActive;
     property FlagLane: Boolean read FFlagLane write SetFlagLane;
   end;
@@ -194,14 +209,15 @@ end;
 
 procedure TSCM.DeActivateTable;
 begin
+  if qryEntrant.Active then qryEntrant.Close;
+  if qryLane.Active then qryLane.Close;
+  if qryHeat.Active then qryHeat.Close;
+  if qryEvent.Active then qryEvent.Close;
+  if qryMember.Active then qryMember.Close;
+  if qrySession.Active then qrySession.Close;
+  if tblSwimClub.Active then tblSwimClub.Close;
+  if qrySCMSystem.Active then qrySCMSystem.Close;
   FIsActive := false;
-  qryEntrant.Close;
-  qryLane.Close;
-  qryHeat.Close;
-  qryEvent.Close;
-  qryMember.Close;
-  qrySession.Close;
-  tblSwimClub.Close;
 end;
 
 {$ENDREGION}
@@ -403,90 +419,6 @@ procedure TSCM.SetFlagLane(Value: Boolean);
 begin
   FFlagLane := Value;
 end;
-
-
-{$REGION 'SIMPLE TEMPORY CONNECTION AND INIFILES CONFIGURATION'}
-
-{
-procedure TSCM.SimpleLoadSettingString(ASection, AName: String; var AValue: String);
-var
-  ini: TIniFile;
-begin
-  // Note: OneDrive enabled: 'Personal'
-  // The routine TPath.GetDocumentsPath normally returns ...
-  // C:\Users\<username>\Documents (Windows Vista or later)
-  // but is instead mapped to C:\Users\<username>\OneDrive\Documents.
-  //
-  ini := TIniFile.Create(TPath.GetDocumentsPath + PathDelim +
-    SCMCONFIGFILENAME);
-  try
-    AValue := ini.ReadString(ASection, AName, '');
-  finally
-    ini.Free;
-  end;
-
-end;
-
-
-procedure TSCM.SimpleMakeTemporyFDConnection(Server, User, Password: String;
-  OsAuthent: Boolean);
-var
-  AValue, ASection, AName: String;
-begin
-
-  if (scmConnection.Connected) then
-    scmConnection.Connected := false;
-
-  scmConnection.Params.Clear();
-  scmConnection.Params.Add('Server=' + Server);
-  scmConnection.Params.Add('DriverID=MSSQL');
-  scmConnection.Params.Add('Database=SwimClubMeet');
-  scmConnection.Params.Add('User_name=' + User);
-  scmConnection.Params.Add('Password=' + Password);
-  if OsAuthent then
-    AValue := 'Yes'
-  else
-    AValue := 'No';
-  scmConnection.Params.Add('OSAuthent=' + AValue);
-  scmConnection.Params.Add('Mars=yes');
-  scmConnection.Params.Add('MetaDefSchema=dbo');
-  scmConnection.Params.Add('ExtendedMetadata=False');
-  scmConnection.Params.Add('ApplicationName=scmTimeKeeper');
-  scmConnection.Connected := True;
-
-  // ON SUCCESS - Save connection details.
-  if scmConnection.Connected Then
-  begin
-    ASection := 'MSSQL_SwimClubMeet';
-    AName := 'Server';
-    SimpleSaveSettingString(ASection, AName, Server);
-    AName := 'User';
-    SimpleSaveSettingString(ASection, AName, User);
-    AName := 'Password';
-    SimpleSaveSettingString(ASection, AName, Password);
-    AName := 'OSAuthent';
-    SimpleSaveSettingString(ASection, AName, AValue);
-  end
-
-end;
-
-procedure TSCM.SimpleSaveSettingString(ASection, AName, AValue: String);
-var
-  ini: TIniFile;
-begin
-  ini := TIniFile.Create(TPath.GetDocumentsPath + PathDelim +
-    SCMCONFIGFILENAME);
-  try
-    ini.WriteString(ASection, AName, AValue);
-  finally
-    ini.Free;
-  end;
-
-end;
-
-}
-
-{$ENDREGION}
 
 
 end.

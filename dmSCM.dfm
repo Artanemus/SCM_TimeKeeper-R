@@ -5,12 +5,14 @@ object SCM: TSCM
   object scmConnection: TFDConnection
     Params.Strings = (
       'ConnectionDef=MSSQL_SwimClubMeet')
+    ConnectedStoredUsage = [auDesignTime]
     Connected = True
     LoginPrompt = False
     Left = 64
     Top = 24
   end
   object tblSwimClub: TFDTable
+    ActiveStoredUsage = [auDesignTime]
     IndexFieldNames = 'SwimClubID'
     Connection = scmConnection
     FormatOptions.AssignedValues = [fvFmtDisplayNumeric]
@@ -96,6 +98,7 @@ object SCM: TSCM
     Top = 120
   end
   object qryEntrant: TFDQuery
+    ActiveStoredUsage = [auDesignTime]
     IndexFieldNames = 'EntrantID'
     MasterSource = dsLane
     MasterFields = 'EntrantID'
@@ -114,55 +117,33 @@ object SCM: TSCM
     UpdateOptions.UpdateTableName = 'SwimClubMeet..Entrant'
     UpdateOptions.KeyFields = 'EntrantID'
     SQL.Strings = (
-      'USE SwimClubMeet;'
-      ''
-      'SET ANSI_NULLS ON'
-      ';'
-      'SET QUOTED_IDENTIFIER ON'
-      ';'
-      ''
-      ''
       'SELECT Entrant.EntrantID'
       '    , Entrant.HeatID'
       '    , HeatIndividual.HeatNum'
       '    , Entrant.Lane'
       '    , Entrant.RaceTime'
-      '    , Entrant.TimeToBeat '
+      '    , Entrant.TimeToBeat'
       '    , Entrant.IsDisqualified'
       '    , Entrant.IsScratched'
       '    , Entrant.PersonalBest'
+      '    , dbo.SwimTimeToString(Entrant.TimeToBeat) AS TimeToBetStr'
       
-        '    , dbo.SwimTimeToString(CAST(Entrant.TimeToBeat as TIME)) AS ' +
-        'TimeToBetStr'
-      
-        '    , dbo.SwimTimeToString(CAST(Entrant.PersonalBest as TIME)) A' +
-        'S PersonalBestStr'
-      
-        '    , dbo.SwimTimeToString(CAST(Entrant.RaceTime as TIME)) AS Ra' +
-        'ceTimeStr'
+        '    , dbo.SwimTimeToString(Entrant.PersonalBest) AS PersonalBest' +
+        'Str'
+      '    , dbo.SwimTimeToString(Entrant.RaceTime) AS RaceTimeStr'
       '    , CONCAT ('
       '        Member.FirstName'
       '        , '#39' '#39
       '        , Upper(Member.LastName)'
       '        ) AS FNameStr'
-      '/*'
-      '    , CONCAT ('
-      '        FORMAT(Entrant.Lane, '#39'00'#39')'
-      '        , '#39' . '#39
-      '        , Member.FirstName'
-      '        , '#39' '#39
-      '        , Upper(Member.LastName)'
-      '        ) AS ListTextStr'
-      '*/'
-      '/*'
-      '    , CONCAT ('
-      '        FORMAT(Entrant.Lane, '#39'00'#39')'
-      '        , '#39' '#39
-      '        , Member.FirstName'
-      '        , '#39' '#39
-      '        , Upper(Member.LastName)'
-      '        ) AS LaneFNameStr'
-      '*/'
+      ''
+      #9',CASE '
+      #9#9'WHEN Entrant.IsDisqualified = 1 THEN '#39'DISQUALIFIED'#39
+      #9#9'WHEN Entrant.IsScratched = 1 THEN '#39'SCRATCHED'#39' '
+      #9#9'ELSE '#39#39
+      #9#9'END'
+      #9#9#9'as QualifiedStatus'
+      ''
       '    , CONCAT ('
       '         FORMAT(HeatIndividual.HeatNum, '#39'\Heat\ #0\  '#39')'
       '        ,FORMAT(Entrant.Lane, '#39'\Lane\ #0\ '#39')'
@@ -171,12 +152,20 @@ object SCM: TSCM
       '        , '#39' '#39
       '        , Upper(Member.LastName)'
       '        ) AS HeatNumLaneFNameStr'
+      '        '
+      '    , Upper(Member.LastName) AS LastNameStr'
+      '    , Entrant.DisqualifyCodeID'
+      '    , DisqualifyCode.ABREV'
+      '    '
       'FROM Entrant'
       'INNER JOIN HeatIndividual'
       '    ON Entrant.HeatID = HeatIndividual.HeatID'
       'LEFT OUTER JOIN Member'
       '    ON Entrant.MemberID = Member.MemberID'
-      'ORDER BY Entrant.Lane')
+      
+        'LEFT JOIN DisqualifyCode ON Entrant.DisqualifyCodeID = Disqualif' +
+        'yCode.DisqualifyCodeID'
+      'ORDER BY Entrant.Lane ')
     Left = 40
     Top = 442
     object qryEntrantEntrantID: TFDAutoIncField
@@ -199,22 +188,27 @@ object SCM: TSCM
     object qryEntrantRaceTime: TTimeField
       FieldName = 'RaceTime'
       Origin = 'RaceTime'
+      DisplayFormat = 'HH:mm:ss.zzz'
     end
     object qryEntrantTimeToBeat: TTimeField
       FieldName = 'TimeToBeat'
       Origin = 'TimeToBeat'
+      DisplayFormat = 'HH:mm:ss.zzz'
     end
     object qryEntrantIsDisqualified: TBooleanField
       FieldName = 'IsDisqualified'
       Origin = 'IsDisqualified'
+      Required = True
     end
     object qryEntrantIsScratched: TBooleanField
       FieldName = 'IsScratched'
       Origin = 'IsScratched'
+      Required = True
     end
     object qryEntrantPersonalBest: TTimeField
       FieldName = 'PersonalBest'
       Origin = 'PersonalBest'
+      DisplayFormat = 'HH:mm:ss.zzz'
     end
     object qryEntrantTimeToBetStr: TWideStringField
       FieldName = 'TimeToBetStr'
@@ -241,12 +235,34 @@ object SCM: TSCM
       Required = True
       Size = 257
     end
+    object qryEntrantQualifiedStatus: TStringField
+      FieldName = 'QualifiedStatus'
+      Origin = 'QualifiedStatus'
+      ReadOnly = True
+      Required = True
+      Size = 12
+    end
     object qryEntrantHeatNumLaneFNameStr: TWideStringField
       FieldName = 'HeatNumLaneFNameStr'
       Origin = 'HeatNumLaneFNameStr'
       ReadOnly = True
       Required = True
       Size = 4000
+    end
+    object qryEntrantLastNameStr: TWideStringField
+      FieldName = 'LastNameStr'
+      Origin = 'LastNameStr'
+      ReadOnly = True
+      Size = 128
+    end
+    object qryEntrantDisqualifyCodeID: TIntegerField
+      FieldName = 'DisqualifyCodeID'
+      Origin = 'DisqualifyCodeID'
+    end
+    object qryEntrantABREV: TWideStringField
+      FieldName = 'ABREV'
+      Origin = 'ABREV'
+      Size = 16
     end
   end
   object dsEntrant: TDataSource
@@ -255,6 +271,7 @@ object SCM: TSCM
     Top = 442
   end
   object qrySession: TFDQuery
+    ActiveStoredUsage = [auDesignTime]
     IndexFieldNames = 'SwimClubID'
     MasterSource = dsSwimClub
     MasterFields = 'SwimClubID'
@@ -353,6 +370,7 @@ object SCM: TSCM
     end
   end
   object qryHeat: TFDQuery
+    ActiveStoredUsage = [auDesignTime]
     AfterScroll = qryHeatAfterScroll
     IndexFieldNames = 'EventID'
     MasterSource = dsEvent
@@ -415,15 +433,23 @@ object SCM: TSCM
       Origin = 'ListDetailStr'
       Size = 60
     end
+    object qryHeatHeatNumStr: TStringField
+      FieldName = 'HeatNumStr'
+      Origin = 'HeatNumStr'
+      ReadOnly = True
+      Required = True
+      Size = 18
+    end
     object qryHeatListTextStr: TStringField
       FieldName = 'ListTextStr'
       Origin = 'ListTextStr'
       ReadOnly = True
       Required = True
-      Size = 18
+      Size = 27
     end
   end
   object qryEvent: TFDQuery
+    ActiveStoredUsage = [auDesignTime]
     IndexFieldNames = 'SessionID'
     MasterSource = dsSession
     MasterFields = 'SessionID'
@@ -443,7 +469,6 @@ object SCM: TSCM
       '    , qryNominees.NomineeCount'
       '    , qryEntrants.EntrantCount'
       '    , Event.SessionID'
-      '    , Event.EventTypeID'
       '    , Event.StrokeID'
       '    , Event.DistanceID'
       '    , Event.EventStatusID'
@@ -521,10 +546,6 @@ object SCM: TSCM
       FieldName = 'SessionID'
       Origin = 'SessionID'
     end
-    object qryEventEventTypeID: TIntegerField
-      FieldName = 'EventTypeID'
-      Origin = 'EventTypeID'
-    end
     object qryEventStrokeID: TIntegerField
       FieldName = 'StrokeID'
       Origin = 'StrokeID'
@@ -553,6 +574,7 @@ object SCM: TSCM
     end
   end
   object qryMember: TFDQuery
+    ActiveStoredUsage = [auDesignTime]
     IndexFieldNames = 'MemberID'
     Connection = scmConnection
     UpdateOptions.UpdateTableName = 'SwimClubMeet..Member'
@@ -562,7 +584,6 @@ object SCM: TSCM
       '[MemberID]'
       '      ,[MembershipNum]'
       '      ,[MembershipStr]'
-      '      ,[MembershipDue]'
       '      ,[FirstName]'
       '      ,[LastName]'
       '      ,[DOB]'
@@ -571,7 +592,6 @@ object SCM: TSCM
       '      ,[EnableEmailOut]'
       '      ,[GenderID]'
       '      ,[SwimClubID]'
-      '      ,[MembershipTypeID]'
       
         ',SubString(Concat(Member.FirstName, '#39' '#39', Upper(Member.LastName))' +
         ', 0, 60) AS FName'
@@ -579,8 +599,66 @@ object SCM: TSCM
       'FROM Member ORDER BY [LastName]')
     Left = 224
     Top = 120
+    object qryMemberMemberID: TFDAutoIncField
+      FieldName = 'MemberID'
+      Origin = 'MemberID'
+      ProviderFlags = [pfInWhere, pfInKey]
+    end
+    object qryMemberMembershipNum: TIntegerField
+      FieldName = 'MembershipNum'
+      Origin = 'MembershipNum'
+    end
+    object qryMemberMembershipStr: TWideStringField
+      FieldName = 'MembershipStr'
+      Origin = 'MembershipStr'
+      Size = 24
+    end
+    object qryMemberFirstName: TWideStringField
+      FieldName = 'FirstName'
+      Origin = 'FirstName'
+      Size = 128
+    end
+    object qryMemberLastName: TWideStringField
+      FieldName = 'LastName'
+      Origin = 'LastName'
+      Size = 128
+    end
+    object qryMemberDOB: TSQLTimeStampField
+      FieldName = 'DOB'
+      Origin = 'DOB'
+    end
+    object qryMemberIsActive: TBooleanField
+      FieldName = 'IsActive'
+      Origin = 'IsActive'
+      Required = True
+    end
+    object qryMemberEmail: TWideStringField
+      FieldName = 'Email'
+      Origin = 'Email'
+      Size = 256
+    end
+    object qryMemberEnableEmailOut: TBooleanField
+      FieldName = 'EnableEmailOut'
+      Origin = 'EnableEmailOut'
+      Required = True
+    end
+    object qryMemberGenderID: TIntegerField
+      FieldName = 'GenderID'
+      Origin = 'GenderID'
+    end
+    object qryMemberSwimClubID: TIntegerField
+      FieldName = 'SwimClubID'
+      Origin = 'SwimClubID'
+    end
+    object qryMemberFName: TWideStringField
+      FieldName = 'FName'
+      Origin = 'FName'
+      ReadOnly = True
+      Size = 60
+    end
   end
   object qryLane: TFDQuery
+    ActiveStoredUsage = [auDesignTime]
     IndexFieldNames = 'LaneNum;EntrantID'
     Connection = scmConnection
     UpdateOptions.AssignedValues = [uvEDelete, uvEInsert, uvEUpdate]
@@ -638,8 +716,8 @@ object SCM: TSCM
       '    , HeatIndividual.HeatID'
       '    , HeatIndividual.HeatNum'
       '    , HeatIndividual.EventID'
-      '    , CASE WHEN Entrant.EntrantID IS NULL'
-      '        THEN CONCAT(FORMAT(#Lanes.LaneNum, '#39'00\.\ '#39'),'#39'EMPTY'#39')'
+      '    , CASE WHEN Entrant.MemberID IS NULL'
+      '        THEN FORMAT(#Lanes.LaneNum, '#39'00\.\ '#39')'
       
         '        ELSE CONCAT(FORMAT(#Lanes.LaneNum, '#39'00\.\ '#39'), Member.Fir' +
         'stName, '#39' '#39', UPPER(Member.LastName))'
@@ -702,7 +780,6 @@ object SCM: TSCM
       FieldName = 'FName'
       Origin = 'FName'
       ReadOnly = True
-      Required = True
       Size = 4000
     end
   end
@@ -720,10 +797,30 @@ object SCM: TSCM
       'SELECT * FROM SCMSystem WHERE SCMSystemID = 1;')
     Left = 264
     Top = 224
+    object qrySCMSystemSCMSystemID: TFDAutoIncField
+      FieldName = 'SCMSystemID'
+      Origin = 'SCMSystemID'
+    end
+    object qrySCMSystemDBVersion: TIntegerField
+      FieldName = 'DBVersion'
+      Origin = 'DBVersion'
+    end
+    object qrySCMSystemMajor: TIntegerField
+      FieldName = 'Major'
+      Origin = 'Major'
+    end
+    object qrySCMSystemMinor: TIntegerField
+      FieldName = 'Minor'
+      Origin = 'Minor'
+    end
+    object qrySCMSystemBuild: TIntegerField
+      FieldName = 'Build'
+      Origin = 'Build'
+    end
   end
   object dsSCMSystem: TDataSource
     DataSet = qrySCMSystem
-    Left = 264
-    Top = 280
+    Left = 360
+    Top = 224
   end
 end

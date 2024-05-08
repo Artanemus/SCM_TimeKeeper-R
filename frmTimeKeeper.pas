@@ -16,6 +16,13 @@ uses
   ProgramSetting;
 
 type
+
+  TDefaultFont = class(TInterfacedObject, IFMXSystemFontService)
+  public
+    function GetDefaultFontFamilyName: string;
+    function GetDefaultFontSize: Single;
+  end;
+
   TTimeKeeper = class(TForm)
     ActionList1: TActionList;
     actnConnect: TAction;
@@ -123,6 +130,7 @@ type
     Timer1: TTimer;
     txt01: TLabel;
     txt03: TLabel;
+    Label3: TLabel;
     procedure actnConnectExecute(Sender: TObject);
     procedure actnConnectUpdate(Sender: TObject);
     procedure actnDisconnectExecute(Sender: TObject);
@@ -1206,5 +1214,21 @@ begin
   lblAniIndicatorStatus.Text := 'Connecting ' + IntToStr(fConnectionCountdown);
 
 end;
+
+{ TDefaultFont }
+
+function TDefaultFont.GetDefaultFontFamilyName: string;
+begin
+  result := 'Tahoma';
+end;
+
+function TDefaultFont.GetDefaultFontSize: Single;
+begin
+  result := 16.0; // Set the default font size here
+end;
+
+initialization
+
+TFont.FontService := TDefaultFont.Create;
 
 end.
