@@ -13,9 +13,11 @@ object SCM: TSCM
   end
   object tblSwimClub: TFDTable
     ActiveStoredUsage = [auDesignTime]
+    Active = True
     IndexFieldNames = 'SwimClubID'
     Connection = scmConnection
     FormatOptions.AssignedValues = [fvFmtDisplayNumeric]
+    ResourceOptions.AssignedValues = [rvEscapeExpand]
     UpdateOptions.UpdateTableName = 'SwimClubMeet..SwimClub'
     UpdateOptions.KeyFields = 'SwimClubID'
     TableName = 'SwimClubMeet..SwimClub'
@@ -99,6 +101,7 @@ object SCM: TSCM
   end
   object qryEntrant: TFDQuery
     ActiveStoredUsage = [auDesignTime]
+    Active = True
     IndexFieldNames = 'EntrantID'
     MasterSource = dsLane
     MasterFields = 'EntrantID'
@@ -272,6 +275,7 @@ object SCM: TSCM
   end
   object qrySession: TFDQuery
     ActiveStoredUsage = [auDesignTime]
+    Active = True
     IndexFieldNames = 'SwimClubID'
     MasterSource = dsSwimClub
     MasterFields = 'SwimClubID'
@@ -281,38 +285,42 @@ object SCM: TSCM
     UpdateOptions.UpdateTableName = 'SwimClubMeet..Session'
     UpdateOptions.KeyFields = 'SessionID'
     SQL.Strings = (
-      'USE SwimClubMeet'
-      ''
       'DECLARE @HideClosed AS BIT;'
       'SET @HideClosed = :HIDECLOSED;'
       ''
       'SELECT Session.SessionID'
-      '    , Session.SessionStart'
-      '    , Session.SwimClubID'
-      '    , Session.SessionStatusID'
-      '    , CASE '
-      '        WHEN Session.SessionStatusID = 1'
-      '            THEN '#39'(UNLOCKED)'#39
-      '        ELSE '#39'(LOCKED)'#39
-      '        END AS SessionStatusStr'
-      '    , Session.Caption'
+      '     , Session.SessionStart'
+      '     , Session.SwimClubID'
+      '     , Session.SessionStatusID'
+      '     , CASE'
+      '           WHEN Session.SessionStatusID = 1 THEN'
+      '               '#39'(UNLOCKED)'#39
+      '           ELSE'
+      '               '#39'(LOCKED)'#39
+      '       END AS SessionStatusStr'
+      '     , Session.Caption'
       
-        '    , Format(SessionStart, '#39'dddd dd/MM/yyyy HH:mm'#39') AS SessionSt' +
-        'artStr'
-      '    , CONCAT ('
-      '        Format(SessionStart, '#39'dddd dd/MM/yyyy HH:mm'#39')'
-      '        , IIF(Session.SessionStatusID = 1, '#39' '#39', '#39' (LOCKED) '#39')'
-      '        , [Session].Caption'
-      '        ) AS SessionDetailStr'
+        '     , FORMAT(SessionStart, '#39'dddd dd/MM/yyyy HH:mm'#39') AS SessionS' +
+        'tartStr'
+      '     , CONCAT('
+      '                 FORMAT(SessionStart, '#39'yyyy-MM-dd HH:mm'#39')'
+      
+        '               , IIF(Session.SessionStatusID = 1, '#39' '#39', '#39' (LOCKED' +
+        ') '#39')'
+      
+        '               , IIF(Session.SessionStatusID = 1, [Session].Capt' +
+        'ion, '#39#39')'
+      '             ) AS SessionDetailStr'
       'FROM Session'
       ''
       
         '-- WHERE (Session.SessionStatusID = 1) OR Session.SessionStatusI' +
         'D = CASE WHEN @HideClosed=1 THEN 1 ELSE 2 END'
-      
-        'WHERE (@HideClosed = 0 AND Session.SessionStatusID = 2) OR (Sess' +
-        'ion.SessionStatusID = 1)'
-      ''
+      'WHERE ('
+      '          @HideClosed = 0'
+      '          AND Session.SessionStatusID = 2'
+      '      )'
+      '      OR (Session.SessionStatusID = 1)'
       'ORDER BY Session.SessionStart DESC'
       ''
       '')
@@ -371,6 +379,7 @@ object SCM: TSCM
   end
   object qryHeat: TFDQuery
     ActiveStoredUsage = [auDesignTime]
+    Active = True
     AfterScroll = qryHeatAfterScroll
     IndexFieldNames = 'EventID'
     MasterSource = dsEvent
@@ -450,6 +459,7 @@ object SCM: TSCM
   end
   object qryEvent: TFDQuery
     ActiveStoredUsage = [auDesignTime]
+    Active = True
     IndexFieldNames = 'SessionID'
     MasterSource = dsSession
     MasterFields = 'SessionID'
@@ -575,6 +585,7 @@ object SCM: TSCM
   end
   object qryMember: TFDQuery
     ActiveStoredUsage = [auDesignTime]
+    Active = True
     IndexFieldNames = 'MemberID'
     Connection = scmConnection
     UpdateOptions.UpdateTableName = 'SwimClubMeet..Member'
@@ -716,6 +727,7 @@ object SCM: TSCM
       '    , HeatIndividual.HeatID'
       '    , HeatIndividual.HeatNum'
       '    , HeatIndividual.EventID'
+      '    , Entrant.MemberID'
       '    , CASE WHEN Entrant.MemberID IS NULL'
       '        THEN FORMAT(#Lanes.LaneNum, '#39'00\.\ '#39')'
       
@@ -782,6 +794,10 @@ object SCM: TSCM
       ReadOnly = True
       Size = 4000
     end
+    object qryLaneMemberID: TIntegerField
+      FieldName = 'MemberID'
+      Origin = 'MemberID'
+    end
   end
   object dsLane: TDataSource
     DataSet = qryLane
@@ -790,13 +806,14 @@ object SCM: TSCM
   end
   object qrySCMSystem: TFDQuery
     ActiveStoredUsage = [auDesignTime]
+    Active = True
     Connection = scmConnection
     SQL.Strings = (
       'USE SwimClubMeet;'
       ''
       'SELECT * FROM SCMSystem WHERE SCMSystemID = 1;')
-    Left = 264
-    Top = 224
+    Left = 224
+    Top = 216
     object qrySCMSystemSCMSystemID: TFDAutoIncField
       FieldName = 'SCMSystemID'
       Origin = 'SCMSystemID'
@@ -820,7 +837,7 @@ object SCM: TSCM
   end
   object dsSCMSystem: TDataSource
     DataSet = qrySCMSystem
-    Left = 360
-    Top = 224
+    Left = 320
+    Top = 216
   end
 end

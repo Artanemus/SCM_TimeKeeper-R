@@ -21,7 +21,7 @@ Coordinates=693,529,105,33
 Visible=False
 
 [lblEntrantName]
-Coordinates=1070,710,90,51
+Coordinates=411,42,90,51
 
 [edtPassword]
 Coordinates=544,232,78,33
@@ -32,7 +32,7 @@ Coordinates=544,771,46,33
 Visible=False
 
 [ListViewEvent]
-Coordinates=200,350,89,141
+Coordinates=1001,76,89,141
 
 [layEntrantList]
 Coordinates=693,584,83,33
@@ -59,13 +59,14 @@ Coordinates=693,694,94,33
 Visible=False
 
 [ListViewLane]
-Coordinates=200,40,89,141
+Coordinates=484,556,89,141
 
 [ListViewHeat]
-Coordinates=560,20,89,195
+Coordinates=351,523,89,195
+Visible=True
 
 [cmbSessionList]
-Coordinates=110,780,93,123
+Coordinates=960,567,93,123
 
 [ScaledLayout1]
 Coordinates=693,804,87,33
@@ -91,10 +92,6 @@ Visible=False
 Coordinates=674,1073,109,33
 Visible=False
 
-[layHeatNumber]
-Coordinates=869,56,89,33
-Visible=False
-
 [lblHeat]
 Coordinates=420,90,48,33
 Visible=False
@@ -102,9 +99,6 @@ Visible=False
 [tabEntrantRaceTime]
 Coordinates=869,111,114,33
 Visible=False
-
-[lblLaneNumber]
-Coordinates=1080,410,89,51
 
 [Label18]
 Coordinates=730,570,52,33
@@ -181,7 +175,7 @@ Coordinates=544,617,85,33
 Visible=False
 
 [lblPersonalBest]
-Coordinates=1120,330,92,51
+Coordinates=410,278,92,51
 
 [ActionList1]
 Coordinates=150,1169,70,33
@@ -200,23 +194,16 @@ Visible=False
 [actnPostTime]
 Coordinates=869,551,81,33
 
-[Label2]
-Coordinates=544,309,46,33
-Visible=False
-
 [laySelectSession]
 Coordinates=869,606,98,33
 Visible=False
 
 [lblTimeToBeat]
-Coordinates=1130,570,85,51
+Coordinates=10,219,85,51
 Visible=True
 
 [StyleBook2]
 Coordinates=869,716,70,33
-
-[lblHeatNumber]
-Coordinates=920,40,87,51
 
 [layRaceTimeEditBox]
 Coordinates=869,771,116,33
@@ -227,67 +214,63 @@ Coordinates=869,826,117,33
 Visible=False
 
 [lblRaceTime]
-Coordinates=1140,490,75,51
+Coordinates=419,396,75,51
 Visible=True
 
-[txt01]
-Coordinates=544,1,40,33
-Visible=False
-
 [btn07]
-Coordinates=11,383,41,51
+Coordinates=908,794,41,51
 
 [btn03]
-Coordinates=21,253,41,51
+Coordinates=981,794,41,51
 
 [btn00]
-Coordinates=405,475,41,51
+Coordinates=162,988,41,51
 
 [Timer1]
 Coordinates=705,1,48,33
 
 [lblAniIndicatorStatus]
-Coordinates=405,244,117,51
+Coordinates=848,988,117,51
 
 [AniIndicator1]
-Coordinates=877,1156,80,33
+Coordinates=10,1072,80,33
 
 [btn06]
-Coordinates=405,552,41,51
+Coordinates=674,794,41,51
 
 [btnRTN]
-Coordinates=405,398,51,51
+Coordinates=1007,988,51,51
 
 [btnPoint]
-Coordinates=405,167,56,51
+Coordinates=440,794,56,51
 
 [btn05]
-Coordinates=405,1,41,51
+Coordinates=601,794,41,51
 
 [btn01]
-Coordinates=576,925,41,51
+Coordinates=89,988,41,51
 
 [GridPanelLayout1]
-Coordinates=1078,1,102,33
+Coordinates=126,1072,102,33
 
 [btn02]
-Coordinates=405,321,41,51
+Coordinates=235,988,41,51
 
 [btn09]
-Coordinates=405,629,41,51
+Coordinates=528,794,41,51
 
 [btn04]
-Coordinates=405,706,41,51
+Coordinates=1092,988,41,51
 
 [btn08]
-Coordinates=151,383,41,51
+Coordinates=696,988,41,51
 
 []
-Coordinates=405,78,52,51
+Coordinates=314,794,87,51
 Visible=False
 
 [Label1]
-Coordinates=253,269,46,51
+Coordinates=769,988,46,51
 
 [SCM.tblSwimClub]
 Visible=False
@@ -329,7 +312,7 @@ Coordinates=525,386,91,33
 Coordinates=101,479,80,33
 
 [SCM.qryMember]
-Coordinates=133,254,95,51
+Coordinates=695,10,95,267
 
 [SCM.dsLane]
 Coordinates=106,1,76,33
@@ -338,34 +321,59 @@ Coordinates=106,1,76,33
 Coordinates=0,0,74,33
 
 [SCM.qrySCMSystem]
-Coordinates=206,559,115,51
+Coordinates=10,794,115,141
 
 [SCM.dsEntrant]
 Coordinates=345,1,88,33
 
 [edtServerName]
-Coordinates=24,245,61,33
+Coordinates=24,245,89,33
 Visible=False
 
 [chkbUseOsAuthentication]
-Coordinates=278,1073,84,33
+Coordinates=278,1073,143,33
 Visible=False
 
 [bsEntrant]
-Coordinates=877,991,119,321
+Coordinates=188,10,119,393
 
 [bsEvent]
-Coordinates=1078,56,78,267
+Coordinates=832,10,75,249
 
 [bsHeat]
-Coordinates=877,1046,72,195
+Coordinates=190,512,68,213
 
 [bsLane]
-Coordinates=858,1201,74,213
+Coordinates=671,512,69,213
 
 [bsSession]
-Coordinates=877,936,89,213
+Coordinates=779,512,85,213
 
 [bsSwimClub]
-Coordinates=892,1101,108,303
+Coordinates=540,10,108,303
+
+[spinboxLockToLane]
+Coordinates=1054,794,114,51
+
+[cmbSwimClubList]
+Coordinates=920,340,103,123
+Visible=True
+
+[btnRefresh]
+Coordinates=593,988,68,51
+
+[chkbLockToLane]
+Coordinates=455,988,99,51
+
+[Label3]
+Coordinates=10,988,46,51
+
+[StyleBook1]
+Coordinates=21,824,70,33
+
+[lblSelectSwimClub]
+Coordinates=308,988,106,51
+
+[chkbSessionVisibility]
+Coordinates=747,794,120,51
 

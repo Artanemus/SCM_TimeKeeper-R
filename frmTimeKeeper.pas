@@ -63,11 +63,9 @@ type
     edtServerName: TEdit;
     edtUser: TEdit;
     GridPanelLayout1: TGridPanelLayout;
-    imgBackSpace: TImageControl;
     Label1: TLabel;
     Label12: TLabel;
     Label18: TLabel;
-    Label2: TLabel;
     Label5: TLabel;
     Label7: TLabel;
     Label8: TLabel;
@@ -79,7 +77,6 @@ type
     layEventHeat: TLayout;
     layEventHeatTitleBar: TLayout;
     layFooter: TLayout;
-    layHeatNumber: TLayout;
     layLane: TLayout;
     layLoginToServer: TLayout;
     layPersonalBest: TLayout;
@@ -98,8 +95,6 @@ type
     lblEntrantName: TLabel;
     lblEvent: TLabel;
     lblHeat: TLabel;
-    lblHeatNumber: TLabel;
-    lblLaneNumber: TLabel;
     lblPersonalBest: TLabel;
     lblRaceTime: TLabel;
     lblSelectSession: TLabel;
@@ -109,8 +104,6 @@ type
     LinkListControlToField2: TLinkListControlToField;
     LinkListControlToField3: TLinkListControlToField;
     LinkListControlToField4: TLinkListControlToField;
-    LinkPropertyToFieldLane: TLinkPropertyToField;
-    LinkPropertyToFieldText3: TLinkPropertyToField;
     LinkPropertyToFieldText5: TLinkPropertyToField;
     LinkPropertyToFieldText6: TLinkPropertyToField;
     LinkPropertyToFieldText7: TLinkPropertyToField;
@@ -128,9 +121,11 @@ type
     tabEventHeat: TTabItem;
     tabLoginSession: TTabItem;
     Timer1: TTimer;
-    txt01: TLabel;
     txt03: TLabel;
     Label3: TLabel;
+    LinkListControlToField5: TLinkListControlToField;
+    btnBackSpace: TButton;
+    imgBackSpaceCntrl: TImageControl;
     procedure actnConnectExecute(Sender: TObject);
     procedure actnConnectUpdate(Sender: TObject);
     procedure actnDisconnectExecute(Sender: TObject);
@@ -522,8 +517,9 @@ begin
   // Note: don't use VK_BACK; - Windows API only
   Key := vkBack; // System.UITypes - Universal, multi-platform.
   KeyChar := Char(vkBack); // KeyChar := #08;
-  if edtRaceTime.IsFocused then
-  begin
+
+//  if edtRaceTime.IsFocused then
+//  begin
     // Note:
     // Backspace doesn't perform correctly unless we run a thread and
     // include the following termination procedure.
@@ -532,6 +528,7 @@ begin
       begin
         try
           edtRaceTime.BeginUpdate;
+          edtRaceTime.SetFocus;
           KeyDown(Key, KeyChar, ShiftState);
         finally
           edtRaceTime.EndUpdate;
@@ -539,7 +536,7 @@ begin
       end);
     Thread.OnTerminate := btnBKSClickTerminate;
     Thread.Start;
-  end;
+//  end;
 end;
 
 procedure TTimeKeeper.btnBKSClickTerminate(Sender: TObject);
@@ -714,9 +711,6 @@ begin
 end;
 
 procedure TTimeKeeper.FormCreate(Sender: TObject);
-var
-  AValue, ASection, AName: String;
-
 begin
   // Initialization of params.
   application.ShowHint := true;
@@ -726,6 +720,7 @@ begin
   Timer1.Enabled := false;
   lblAniIndicatorStatus.Visible := false;
   cmbSessionList.Items.Clear;
+  cmbSwimClubList.Items.Clear;
   chkbSessionVisibility.IsChecked := true;
   fLoginTimeOut := CONNECTIONTIMEOUT;
   fConnectionCountdown := fLoginTimeOut;
@@ -982,8 +977,7 @@ begin
   layPersonalBest.Visible := false;
   layTimeToBeat.Visible := false;
   layEntrantName.Visible := false;
-  layLane.Visible := false;
-  layHeatNumber.Visible := false;
+
   if (Assigned(SCM) and SCM.IsActive) then
   begin
     SCM.qryEntrant.DisableControls;
@@ -995,11 +989,9 @@ begin
     if (not SCM.qryHeat.IsEmpty) then
     begin
       // Is there a swimmer assigned to the lane?
-      if not(SCM.qryLane.FieldByName('EntrantID').IsNull) then
+      if not(SCM.qryLane.FieldByName('MemberID').IsNull) then
       begin
         // SWIMMER IN LANE - SHOW ALL ENTRANT DETAILS
-        layHeatNumber.Visible := true;
-        layLane.Visible := true;
         layEntrantName.Visible := true;
         layTimeToBeat.Visible := true;
         layPersonalBest.Visible := true;
@@ -1009,8 +1001,6 @@ begin
       begin
         // SHOW HEAT AND LANE
         // Selected controls remain hidden.
-        layHeatNumber.Visible := true;
-        layLane.Visible := true;
       end;
     end;
     //

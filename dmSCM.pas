@@ -35,14 +35,6 @@ type
     qryEntrant: TFDQuery;
     dsEntrant: TDataSource;
     qrySession: TFDQuery;
-    qrySessionSessionID: TFDAutoIncField;
-    qrySessionSessionStart: TSQLTimeStampField;
-    qrySessionSwimClubID: TIntegerField;
-    qrySessionSessionStatusID: TIntegerField;
-    qrySessionSessionStatusStr: TStringField;
-    qrySessionCaption: TWideStringField;
-    qrySessionSessionStartStr: TWideStringField;
-    qrySessionSessionDetailStr: TWideStringField;
     qryHeat: TFDQuery;
     qryEvent: TFDQuery;
     qryEventEventID: TFDAutoIncField;
@@ -111,6 +103,15 @@ type
     qrySCMSystemMajor: TIntegerField;
     qrySCMSystemMinor: TIntegerField;
     qrySCMSystemBuild: TIntegerField;
+    qrySessionSessionID: TFDAutoIncField;
+    qrySessionSessionStart: TSQLTimeStampField;
+    qrySessionSwimClubID: TIntegerField;
+    qrySessionSessionStatusID: TIntegerField;
+    qrySessionSessionStatusStr: TStringField;
+    qrySessionCaption: TWideStringField;
+    qrySessionSessionStartStr: TWideStringField;
+    qrySessionSessionDetailStr: TWideStringField;
+    qryLaneMemberID: TIntegerField;
     procedure qryHeatAfterScroll(DataSet: TDataSet);
     procedure DataModuleCreate(Sender: TObject);
 
