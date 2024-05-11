@@ -108,10 +108,6 @@ Visible=False
 Coordinates=693,1128,52,33
 Visible=False
 
-[edtRaceTime]
-Coordinates=544,694,78,33
-Visible=False
-
 [BindingsList1]
 Coordinates=674,1169,82,33
 
@@ -238,9 +234,6 @@ Coordinates=10,1072,80,33
 [btn06]
 Coordinates=674,794,41,51
 
-[btnRTN]
-Coordinates=1007,988,51,51
-
 [btnPoint]
 Coordinates=440,794,56,51
 
@@ -266,8 +259,8 @@ Coordinates=1092,988,41,51
 Coordinates=696,988,41,51
 
 []
-Coordinates=314,794,87,51
-Visible=False
+Coordinates=200,440,109,33
+Visible=True
 
 [Label1]
 Coordinates=769,988,46,51
@@ -344,7 +337,7 @@ Coordinates=832,10,75,249
 Coordinates=190,512,68,213
 
 [bsLane]
-Coordinates=671,512,69,213
+Coordinates=671,512,69,231
 
 [bsSession]
 Coordinates=779,512,85,213
@@ -376,4 +369,19 @@ Coordinates=308,988,106,51
 
 [chkbSessionVisibility]
 Coordinates=747,794,120,51
+
+[btnBackSpace]
+Coordinates=920,881,85,51
+
+[imgBackSpaceCntrl]
+Coordinates=166,824,111,51
+
+[Button1]
+Coordinates=345,395,53,51
+
+[btnClear]
+Coordinates=1007,988,51,51
+
+[txtRaceTime]
+Coordinates=109,334,78,51
 

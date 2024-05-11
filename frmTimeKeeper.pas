@@ -13,7 +13,7 @@ uses
   FMX.ListView, FMX.ListBox, FMX.Edit, FMX.Controls.Presentation,
   FMX.TabControl, FMX.Layouts, dmSCM, System.Character,
   System.IOUtils, Data.DB, FireDAC.Stan.Param, FMX.EditBox, FMX.SpinBox,
-  ProgramSetting;
+  ProgramSetting, FMX.Styles.Objects;
 
 type
 
@@ -52,14 +52,13 @@ type
     btnDisconnect: TButton;
     btnPoint: TButton;
     btnRefresh: TButton;
-    btnRTN: TButton;
+    btnClear: TButton;
     chkbLockToLane: TCheckBox;
     chkbSessionVisibility: TCheckBox;
     chkbUseOsAuthentication: TCheckBox;
     cmbSessionList: TComboBox;
     cmbSwimClubList: TComboBox;
     edtPassword: TEdit;
-    edtRaceTime: TEdit;
     edtServerName: TEdit;
     edtUser: TEdit;
     GridPanelLayout1: TGridPanelLayout;
@@ -126,6 +125,13 @@ type
     LinkListControlToField5: TLinkListControlToField;
     btnBackSpace: TButton;
     imgBackSpaceCntrl: TImageControl;
+    txtRaceTime: TLabel;
+    Button1: TButton;
+    btnGetTime: TButton;
+    ImageControl2: TImageControl;
+    spinbNumOfDecimalPlaces: TSpinBox;
+    Layout1: TLayout;
+    Label4: TLabel;
     procedure actnConnectExecute(Sender: TObject);
     procedure actnConnectUpdate(Sender: TObject);
     procedure actnDisconnectExecute(Sender: TObject);
@@ -134,17 +140,10 @@ type
     procedure actnPostTimeUpdate(Sender: TObject);
     procedure actnRefreshExecute(Sender: TObject);
     procedure actnRefreshUpdate(Sender: TObject);
-    procedure BackSpaceClick(Sender: TObject);
-    procedure btn00Click(Sender: TObject);
-    procedure btn01Click(Sender: TObject);
-    procedure btn02Click(Sender: TObject);
-    procedure btn03Click(Sender: TObject);
-    procedure btn04Click(Sender: TObject);
-    procedure btn05Click(Sender: TObject);
-    procedure btn06Click(Sender: TObject);
-    procedure btn07Click(Sender: TObject);
-    procedure btn08Click(Sender: TObject);
-    procedure btn09Click(Sender: TObject);
+    procedure btnBackSpaceClick(Sender: TObject);
+    procedure btnNumClick(Sender: TObject);
+    procedure btnClearClick(Sender: TObject);
+    procedure btnGetTimeClick(Sender: TObject);
     procedure btnPointClick(Sender: TObject);
     procedure chkbLockToLaneChange(Sender: TObject);
     procedure chkbSessionVisibilityChange(Sender: TObject);
@@ -163,23 +162,25 @@ type
   private
   const
     CONNECTIONTIMEOUT = 48;
-    SCMCONFIGFILENAME = 'SCMConfig.ini';
   var
     fConnectionCountdown: Integer;
     fLoginTimeOut: Integer;
+    fIN: String;
 
     procedure btnBKSClickTerminate(Sender: TObject);
     procedure ConnectOnTerminate(Sender: TObject);
     function GetSCMVerInfo(): string;
 
-    // JSON Program Settings
-    procedure LoadFromSettings;
-    procedure LoadSettings;
+
+    procedure LoadFromSettings; // JSON Program Settings
+    procedure LoadSettings; // JSON Program Settings
     procedure PostRaceTime;
-    procedure SaveToSettings;
+    procedure SaveToSettings; // JSON Program Settings
     procedure Update_Layout;
     procedure Update_SessionVisibility;
     procedure Update_TabSheetCaptions;
+    function GetDisplayRaceTime(aRawString: string): string;
+    function GetRawRaceTime(RaceTimeStr: string): string;
 
   public
     { Public declarations }
@@ -341,17 +342,17 @@ begin
     // Is there a swimmer assigned to the lane?
     begin
       if (not SCM.qryEntrant.IsEmpty) then
-        btnRTN.Enabled := true
+        btnBackSpace.Enabled := true
       else
-        btnRTN.Enabled := false;
+        btnBackSpace.Enabled := false;
     end
     // session is locked or heat is raced or closed ...
     else
-      btnRTN.Enabled := false;
+      btnBackSpace.Enabled := false;
   end
   // database isn't connected
   else
-    btnRTN.Enabled := false;
+    btnBackSpace.Enabled := false;
 end;
 
 procedure TTimeKeeper.actnRefreshExecute(Sender: TObject);
@@ -387,162 +388,36 @@ begin
     actnRefresh.Enabled := false;
 end;
 
-procedure TTimeKeeper.btn00Click(Sender: TObject);
-var
-  Key: Word;
-  KeyChar: Char;
-  ShiftState: TShiftState;
+procedure TTimeKeeper.btnNumClick(Sender: TObject);
 begin
-  Key := VK_NUMPAD0;
-  KeyChar := '0';
-  if edtRaceTime.IsFocused then
-    KeyDown(Key, KeyChar, ShiftState);
+  fIN := TButton(Sender).Text;
 end;
 
-procedure TTimeKeeper.btn01Click(Sender: TObject);
-var
-  Key: Word;
-  KeyChar: Char;
-  ShiftState: TShiftState;
+procedure TTimeKeeper.btnBackSpaceClick(Sender: TObject);
 begin
-  Key := VK_NUMPAD1;
-  KeyChar := '1';
-  if edtRaceTime.IsFocused then
-    KeyDown(Key, KeyChar, ShiftState);
-end;
-
-procedure TTimeKeeper.btn02Click(Sender: TObject);
-var
-  Key: Word;
-  KeyChar: Char;
-  ShiftState: TShiftState;
-begin
-  Key := VK_NUMPAD2;
-  KeyChar := '2';
-  if edtRaceTime.IsFocused then
-    KeyDown(Key, KeyChar, ShiftState);
-end;
-
-procedure TTimeKeeper.btn03Click(Sender: TObject);
-var
-  Key: Word;
-  KeyChar: Char;
-  ShiftState: TShiftState;
-begin
-  Key := VK_NUMPAD3;
-  KeyChar := '3';
-  if edtRaceTime.IsFocused then
-    KeyDown(Key, KeyChar, ShiftState);
-end;
-
-procedure TTimeKeeper.btn04Click(Sender: TObject);
-var
-  Key: Word;
-  KeyChar: Char;
-  ShiftState: TShiftState;
-begin
-  Key := VK_NUMPAD4;
-  KeyChar := '4';
-  if edtRaceTime.IsFocused then
-    KeyDown(Key, KeyChar, ShiftState);
-end;
-
-procedure TTimeKeeper.btn05Click(Sender: TObject);
-var
-  Key: Word;
-  KeyChar: Char;
-  ShiftState: TShiftState;
-begin
-  Key := VK_NUMPAD5;
-  KeyChar := '5';
-  if edtRaceTime.IsFocused then
-    KeyDown(Key, KeyChar, ShiftState);
-end;
-
-procedure TTimeKeeper.btn06Click(Sender: TObject);
-var
-  Key: Word;
-  KeyChar: Char;
-  ShiftState: TShiftState;
-begin
-  Key := VK_NUMPAD6;
-  KeyChar := '6';
-  if edtRaceTime.IsFocused then
-    KeyDown(Key, KeyChar, ShiftState);
-end;
-
-procedure TTimeKeeper.btn07Click(Sender: TObject);
-var
-  Key: Word;
-  KeyChar: Char;
-  ShiftState: TShiftState;
-begin
-  Key := VK_NUMPAD7;
-  KeyChar := '7';
-  if edtRaceTime.IsFocused then
-    KeyDown(Key, KeyChar, ShiftState);
-end;
-
-procedure TTimeKeeper.btn08Click(Sender: TObject);
-var
-  Key: Word;
-  KeyChar: Char;
-  ShiftState: TShiftState;
-begin
-  Key := VK_NUMPAD8;
-  KeyChar := '8';
-  if edtRaceTime.IsFocused then
-    KeyDown(Key, KeyChar, ShiftState);
-end;
-
-procedure TTimeKeeper.btn09Click(Sender: TObject);
-var
-  Key: Word;
-  KeyChar: Char;
-  ShiftState: TShiftState;
-begin
-  Key := VK_NUMPAD9;
-  KeyChar := '9';
-  if edtRaceTime.IsFocused then
-    KeyDown(Key, KeyChar, ShiftState);
-end;
-
-procedure TTimeKeeper.BackSpaceClick(Sender: TObject);
-var
-  Key: Word;
-  KeyChar: Char;
-  ShiftState: TShiftState;
-  Thread: TThread;
-begin
-  // Note: don't use VK_BACK; - Windows API only
-  Key := vkBack; // System.UITypes - Universal, multi-platform.
-  KeyChar := Char(vkBack); // KeyChar := #08;
-
-//  if edtRaceTime.IsFocused then
-//  begin
-    // Note:
-    // Backspace doesn't perform correctly unless we run a thread and
-    // include the following termination procedure.
-    Thread := TThread.CreateAnonymousThread(
-      procedure
-      begin
-        try
-          edtRaceTime.BeginUpdate;
-          edtRaceTime.SetFocus;
-          KeyDown(Key, KeyChar, ShiftState);
-        finally
-          edtRaceTime.EndUpdate;
-        end;
-      end);
-    Thread.OnTerminate := btnBKSClickTerminate;
-    Thread.Start;
-//  end;
+  Delete(fIN, Length(fIN), 1);
 end;
 
 procedure TTimeKeeper.btnBKSClickTerminate(Sender: TObject);
 begin
-  edtRaceTime.SetFocus;
-  edtRaceTime.Repaint;
+  txtRaceTime.SetFocus;
+  txtRaceTime.Repaint;
+end;
+
+procedure TTimeKeeper.btnClearClick(Sender: TObject);
+begin
+  fIN := '';
+end;
+
+procedure TTimeKeeper.btnGetTimeClick(Sender: TObject);
+var
+s:string;
+i: integer;
+begin
+  s := bsEntrant.DataSet.FieldByName('RaceTimeStr').AsString;
+  s := GetRawRaceTime(s);
+  s := GetDisplayRaceTime(s);
+  txtRaceTime.Text := s;
 end;
 
 procedure TTimeKeeper.btnPointClick(Sender: TObject);
@@ -553,7 +428,7 @@ var
 begin
   Key := VK_DECIMAL;
   KeyChar := '.';
-  if edtRaceTime.IsFocused then
+  if txtRaceTime.IsFocused then
     KeyDown(Key, KeyChar, ShiftState);
 end;
 
@@ -675,7 +550,7 @@ begin
       TThread.Synchronize(nil,
         procedure()
         begin
-          edtRaceTime.SelectAll();
+//          edtRaceTime.SelectAll();
 
         end);
     end).Start;
@@ -704,9 +579,9 @@ begin
   if Key = VK_RETURN then
   begin
     // test for DONE.
-    if edtRaceTime.ReturnKeyType = TReturnKeyType.Done then
+//    if edtRaceTime.ReturnKeyType = TReturnKeyType.Done then
       // Post the time to the database.
-      actnPostTimeExecute(self);
+//      actnPostTimeExecute(self);
   end;
 end;
 
@@ -762,6 +637,89 @@ begin
     end;
     SCM.Free;
   end;
+end;
+
+function TTimeKeeper.GetDisplayRaceTime(aRawString: string): string;
+var
+
+NumberOfDecimalPlaces, i: integer;
+  hours, minutes, seconds, hundredths, s: string;
+begin
+  NumberOfDecimalPlaces := Round(spinbNumOfDecimalPlaces.Value);
+
+  i := NumberOfDecimalPlaces;
+
+  if (NumberOfDecimalPlaces > 0) then
+  begin
+    if (i >= Length(aRawString))  then
+      hundredths := Copy(aRawString, 1, Length(aRawString))
+    else
+      hundredths := Copy(aRawString, Length(aRawString) - i, i);
+  end
+  else
+    hundredths := '';
+
+  i := Length(aRawString) - NumberOfDecimalPlaces;
+  if (i = 1) OR (i=2) then
+    seconds := Copy(aRawString, 1, i)
+  else if (i <= 0) then
+    seconds := ''
+  else
+    seconds := Copy(aRawString, Length(aRawString) - NumberOfDecimalPlaces - 2, 2) ;
+
+  i := Length(aRawString) - NumberOfDecimalPlaces - 2;
+  if (i = 1) OR (i=2) then
+    minutes := Copy(aRawString, Length(aRawString) - NumberOfDecimalPlaces - i, i)
+  else if (i <= 0) then
+    minutes := ''
+  else
+    minutes := Copy(aRawString, Length(aRawString) - NumberOfDecimalPlaces - 4, 2) ;
+
+  i := Length(aRawString) - NumberOfDecimalPlaces - 4;
+  if (i = 1) OR (i=2) then
+    hours := Copy(aRawString, Length(aRawString) - NumberOfDecimalPlaces - i, i)
+  else if (i <= 0) then
+    hours := ''
+  else
+    hours := Copy(aRawString, Length(aRawString) - NumberOfDecimalPlaces - 6, 2) ;
+
+  s := '';
+  if (Length(Hours)>0) then
+  s := s + Hours + ':';
+  if (Length(Minutes)>0) then
+  s := s + Minutes + ':';
+  if (Length(Seconds)>0) then
+  s := s + Seconds + '.';
+  if (Length(hundredths)>0) then
+  s := s + hundredths;
+
+  result := s;
+
+end;
+
+function TTimeKeeper.GetRawRaceTime(RaceTimeStr: string): string;
+var
+s: string;
+NumberOfDecimalPlaces, i: integer;
+begin
+  // takes RaceTimeStr given by dbo.Entrant and strips down
+  // to raw numbers.
+  s := RaceTimeStr;
+  // remove colons
+  s := StringReplace(s, ':', '', [rfReplaceAll]);
+  // remove colons
+  s := StringReplace(s, '.', '', [rfReplaceAll]);
+  // remove leading zeros
+  while (Length(s) > 0) and (s[1] = '0') do
+    Delete(s, 1, 1);
+  // remove spaces
+  s := Trim(s);
+  // three decimal places are displayed in string
+  NumberOfDecimalPlaces := Round(spinbNumOfDecimalPlaces.Value);
+  i := 3 - NumberOfDecimalPlaces;
+  Delete(s, Length(s) - i, i);
+
+  result := s;
 end;
 
 function TTimeKeeper.GetSCMVerInfo(): string;
@@ -857,7 +815,7 @@ begin
         s1 := '';
         s2 := 'ERROR: Invalid RaceTime. Please check input.';
         // USER INPUT DATA
-        s := edtRaceTime.Text;
+        s := txtRaceTime.Text;
         // strip unwanted characters.
         // String[] index is base one .... IsDigit is base one.
         i := 1;
@@ -925,7 +883,7 @@ begin
               SCM.qryEntrant.EnableControls;
 
               // CLEAR TEXT - FOR USER FEEDBACK
-              edtRaceTime.Text := '';
+              txtRaceTime.Text := '';
 
               // updates the label lblRaceTime
               // this will indicate to the use that the value
