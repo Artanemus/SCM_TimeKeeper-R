@@ -132,6 +132,9 @@ type
     spinbNumOfDecimalPlaces: TSpinBox;
     Layout1: TLayout;
     Label4: TLabel;
+    Rectangle1: TRectangle;
+    btnClearTime: TButton;
+    layRace_Time: TLayout;
     procedure actnConnectExecute(Sender: TObject);
     procedure actnConnectUpdate(Sender: TObject);
     procedure actnDisconnectExecute(Sender: TObject);
@@ -143,6 +146,7 @@ type
     procedure btnBackSpaceClick(Sender: TObject);
     procedure btnNumClick(Sender: TObject);
     procedure btnClearClick(Sender: TObject);
+    procedure btnClearTimeClick(Sender: TObject);
     procedure btnGetTimeClick(Sender: TObject);
     procedure btnPointClick(Sender: TObject);
     procedure chkbLockToLaneChange(Sender: TObject);
@@ -159,9 +163,11 @@ type
     procedure ListViewLaneChange(Sender: TObject);
     procedure TabControl1Change(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
-  private
-  const
+  private const
     CONNECTIONTIMEOUT = 48;
+    procedure StripTimeChars(var s: string);
+    function GetDisplayRaceTimeALT(aRawString: string): string;
+
   var
     fConnectionCountdown: Integer;
     fLoginTimeOut: Integer;
@@ -171,10 +177,10 @@ type
     procedure ConnectOnTerminate(Sender: TObject);
     function GetSCMVerInfo(): string;
 
-
     procedure LoadFromSettings; // JSON Program Settings
     procedure LoadSettings; // JSON Program Settings
     procedure PostRaceTime;
+    procedure ClearRaceTime;
     procedure SaveToSettings; // JSON Program Settings
     procedure Update_Layout;
     procedure Update_SessionVisibility;
@@ -203,10 +209,9 @@ uses
   // Shellapi,
 {$ENDIF}
   // FOR scmLoadOptions
-//  System.IniFiles,
+  // System.IniFiles,
   // FOR Floor
   System.Math, ExeInfo, SCMSimpleConnect, SCMUtility;
-
 
 procedure TTimeKeeper.actnConnectExecute(Sender: TObject);
 var
@@ -252,8 +257,8 @@ begin
   // verbose code - stop unecessary repaints ...
   if Assigned(SCM) then
   begin
-    if SCM.scmConnection.Connected and actnConnect.Visible  then
-        actnConnect.Visible := false;
+    if SCM.scmConnection.Connected and actnConnect.Visible then
+      actnConnect.Visible := false;
     if not SCM.scmConnection.Connected and not actnConnect.Visible then
       actnConnect.Visible := true;
   end
@@ -290,9 +295,9 @@ begin
   if Assigned(SCM) then
   begin
     if SCM.scmConnection.Connected and not actnDisconnect.Visible then
-        actnDisconnect.Visible := true;
+      actnDisconnect.Visible := true;
     if not SCM.scmConnection.Connected and actnDisconnect.Visible then
-        actnDisconnect.Visible := false;
+      actnDisconnect.Visible := false;
   end
   else // D E F A U L T  I N I T  . Data module not created.
   begin
@@ -389,13 +394,26 @@ begin
 end;
 
 procedure TTimeKeeper.btnNumClick(Sender: TObject);
+var
+  s: string;
 begin
-  fIN := TButton(Sender).Text;
+  s := txtRaceTime.Text;
+  s := s + TButton(Sender).Text;
+  StripTimeChars(s);
+  s := GetDisplayRaceTime(s);
+  txtRaceTime.Text := s;
 end;
 
 procedure TTimeKeeper.btnBackSpaceClick(Sender: TObject);
+var
+  s: string;
 begin
-  Delete(fIN, Length(fIN), 1);
+  s := txtRaceTime.Text;
+  s := s + TButton(Sender).Text;
+  StripTimeChars(s);
+  Delete(s, Length(s), 1);
+  s := GetDisplayRaceTime(s);
+  txtRaceTime.Text := s;
 end;
 
 procedure TTimeKeeper.btnBKSClickTerminate(Sender: TObject);
@@ -406,18 +424,42 @@ end;
 
 procedure TTimeKeeper.btnClearClick(Sender: TObject);
 begin
-  fIN := '';
+  txtRaceTime.Text := '';
+end;
+
+procedure TTimeKeeper.btnClearTimeClick(Sender: TObject);
+begin
+  // Check for connection
+  if (Assigned(SCM) and SCM.IsActive) then
+  begin
+    if ((SCM.qryHeat.FieldByName('HeatStatusID').AsInteger <> 1) or
+      (SCM.qrySession.FieldByName('SessionStatusID').AsInteger <> 1)) then
+    begin
+{$IFDEF MSWINDOWS}
+      MessageBeep(MB_ICONERROR);
+{$ENDIF}
+      lblConnectionStatus.Text :=
+        'Failed to Clear Time because the session/heat is locked/closed.';
+    end
+    else
+      ClearRaceTime; // routine will post and display a status message
+    Refresh_Lane;
+  end
 end;
 
 procedure TTimeKeeper.btnGetTimeClick(Sender: TObject);
 var
-s:string;
-i: integer;
+  s: string;
 begin
-  s := bsEntrant.DataSet.FieldByName('RaceTimeStr').AsString;
-  s := GetRawRaceTime(s);
-  s := GetDisplayRaceTime(s);
-  txtRaceTime.Text := s;
+  if bsLane.DataSet.FieldByName('MemberID').IsNull then
+    txtRaceTime.Text := ''
+  else
+  begin
+    s := bsEntrant.DataSet.FieldByName('RaceTimeStr').AsString;
+    s := GetRawRaceTime(s);
+    s := GetDisplayRaceTime(s);
+    txtRaceTime.Text := s;
+  end;
 end;
 
 procedure TTimeKeeper.btnPointClick(Sender: TObject);
@@ -435,14 +477,55 @@ end;
 procedure TTimeKeeper.chkbLockToLaneChange(Sender: TObject);
 begin
   // TODO ....
-//  if (Assigned(SCM) and SCM.scmConnection.Connected) then
-//    Update_LockToLane();
+  // if (Assigned(SCM) and SCM.scmConnection.Connected) then
+  // Update_LockToLane();
 end;
 
 procedure TTimeKeeper.chkbSessionVisibilityChange(Sender: TObject);
 begin
   if (Assigned(SCM) and SCM.scmConnection.Connected) then
     Update_SessionVisibility();
+end;
+
+procedure TTimeKeeper.ClearRaceTime;
+begin
+  lblConnectionStatus.Text := '';
+  if not Assigned(SCM) then exit;
+  if not SCM.IsActive then exit;
+  // session cannot be locked.
+  if not (SCM.qrySession.FieldByName('SessionStatusID').AsInteger = 1) then exit;
+  // only opened or raced heats can be cleared ...
+  if (SCM.qryHeat.FieldByName('HeatStatusID').AsInteger = 3) then exit;
+  // Is there an ENTRANT.
+  if SCM.qryLane.FieldByName('MemberID').IsNull then exit;
+  if not SCM.qryEntrant.FieldByName('EntrantID').IsNull then
+  begin
+    try
+      begin
+        SCM.qryEntrant.DisableControls;
+        SCM.qryEntrant.Edit;
+        SCM.qryEntrant.FieldByName('RaceTime').Clear;
+        SCM.qryEntrant.Post;
+        SCM.qryEntrant.EnableControls;
+        Refresh_EntrantRaceTime;
+{$IFDEF MSWINDOWS}
+        MessageBeep(MB_ICONINFORMATION);
+{$ENDIF}
+        lblConnectionStatus.Text :=
+          'INFO: The RaceTime was successfully cleared.';
+      end
+    except
+      on E: Exception do
+      begin
+        // bad conversion
+{$IFDEF MSWINDOWS}
+        MessageBeep(MB_ICONERROR);
+{$ENDIF}
+        lblConnectionStatus.Text :=
+          'ERROR: Unable to clear time to the SCM database!'
+      end;
+    end;
+  end;
 end;
 
 procedure TTimeKeeper.cmbSessionListChange(Sender: TObject);
@@ -485,7 +568,8 @@ begin
     // Exit;
   end;
 
-  if not Assigned(SCM) then exit;
+  if not Assigned(SCM) then
+    exit;
 
   // C O N N E C T E D  .
   if (SCM.scmConnection.Connected) then
@@ -550,7 +634,7 @@ begin
       TThread.Synchronize(nil,
         procedure()
         begin
-//          edtRaceTime.SelectAll();
+          // edtRaceTime.SelectAll();
 
         end);
     end).Start;
@@ -579,9 +663,9 @@ begin
   if Key = VK_RETURN then
   begin
     // test for DONE.
-//    if edtRaceTime.ReturnKeyType = TReturnKeyType.Done then
-      // Post the time to the database.
-//      actnPostTimeExecute(self);
+    // if edtRaceTime.ReturnKeyType = TReturnKeyType.Done then
+    // Post the time to the database.
+    // actnPostTimeExecute(self);
   end;
 end;
 
@@ -600,8 +684,9 @@ begin
   fLoginTimeOut := CONNECTIONTIMEOUT;
   fConnectionCountdown := fLoginTimeOut;
   chkbLockToLane.IsChecked := false;
+  txtRaceTime.Text := '';
 
-   // A Class that uses JSON to read and write application configuration
+  // A Class that uses JSON to read and write application configuration
   if Settings = nil then
     Settings := TPrgSetting.Create;
 
@@ -611,12 +696,12 @@ begin
   if SCM.scmConnection.Connected then
     SCM.scmConnection.Connected := false;
 
-   // READ APPLICATION   C O N F I G U R A T I O N   PARAMS.
+  // READ APPLICATION   C O N F I G U R A T I O N   PARAMS.
   // JSON connection settings. Windows location :
   // %SYSTEMDRIVE\%%USER%\%USERNAME%\AppData\Roaming\Artanemus\SwimClubMeet
   LoadSettings;
 
-   // TAB_SHEET : DEFAULT: Login-Session
+  // TAB_SHEET : DEFAULT: Login-Session
   TabControl1.TabIndex := 0;
 
   Update_Layout;
@@ -641,83 +726,163 @@ end;
 
 function TTimeKeeper.GetDisplayRaceTime(aRawString: string): string;
 var
-
-NumberOfDecimalPlaces, i: integer;
+  nodp: Integer; // Number of decimal places.
+  len, i: Integer; // length of raw string.
   hours, minutes, seconds, hundredths, s: string;
 begin
-  NumberOfDecimalPlaces := Round(spinbNumOfDecimalPlaces.Value);
-
-  i := NumberOfDecimalPlaces;
-
-  if (NumberOfDecimalPlaces > 0) then
+  if (aRawString = '') then // string is empty.
   begin
-    if (i >= Length(aRawString))  then
-      hundredths := Copy(aRawString, 1, Length(aRawString))
+    result := '';
+    exit;
+  end;
+
+  nodp := Round(spinbNumOfDecimalPlaces.Value);
+  len := Length(aRawString);
+
+  if (nodp > 0) then
+  begin
+    if (len > nodp) then
+      hundredths := Copy(aRawString, len - nodp + 1, nodp)
     else
-      hundredths := Copy(aRawString, Length(aRawString) - i, i);
+    begin
+      // len equal nodp or less : only hundredths to display
+      result := '.' + Copy(aRawString, 1, len);
+      exit;
+    end;
+  end
+  else
+    hundredths := ''; // decimal place not being used.
+
+  i := len - nodp; // number of chars after hundredths are removed.
+  if (i = 1) or (i = 2) then
+  begin
+    if i = 1 then
+      seconds := Copy(aRawString, 1, 1);
+    if i = 2 then
+      seconds := Copy(aRawString, 1, 2);
+    result := seconds + '.' + hundredths;
+    exit;
+  end
+  else
+    seconds := Copy(aRawString, len - nodp - 1, 2);
+
+  // number of chars after hundredths and seconds are removed.
+  i := len - nodp;
+  if (i = 3) OR (i = 4) then
+  begin
+    if i = 3 then
+      minutes := Copy(aRawString, 1, 1);
+    if i = 4 then
+      minutes := Copy(aRawString, 1, 2);
+    if (nodp = 0) then
+      result := minutes + ':' + seconds
+    else
+      result := minutes + ':' + seconds + '.' + hundredths;
+    exit;
+  end
+  else
+    minutes := Copy(aRawString, len - nodp - 3, 2);
+
+  // number of chars after hundredths, seconds and minute are removed.
+  i := len - nodp;
+  if (i = 5) OR (i = 6) then
+  begin
+    if i = 5 then
+      hours := Copy(aRawString, 1, 1);
+    if i = 6 then
+      hours := Copy(aRawString, 1, 2);
+    if (nodp = 0) then
+      result := hours + ':' + minutes + ':' + seconds
+    else
+      result := hours + ':' + minutes + ':' + seconds + '.' + hundredths;
+    exit;
+  end;
+  // no chars for hours - just return ...
+  if (nodp = 0) then
+    result := minutes + ':' + seconds
+  else
+    result := minutes + ':' + seconds + '.' + hundredths;
+end;
+
+function TTimeKeeper.GetDisplayRaceTimeALT(aRawString: string): string;
+var
+  nodp, len, i: Integer;
+  hours, minutes, seconds, hundredths: string;
+
+  function FormatTime(h, m, s, hund: string): string;
+  begin
+    if hund <> '' then
+      hund := '.' + hund;
+    if h = '' then
+      result := Format('%s:%s%s', [m, s, hund])
+    else
+      result := Format('%s:%s:%s%s', [h, m, s, hund]);
+  end;
+
+begin
+  if aRawString = '' then
+    exit('');
+
+  nodp := Round(spinbNumOfDecimalPlaces.Value);
+  len := Length(aRawString);
+
+  if nodp > 0 then
+  begin
+    if len > nodp then
+      hundredths := Copy(aRawString, len - nodp + 1, nodp)
+    else
+      exit(Copy(aRawString, 1, len));
   end
   else
     hundredths := '';
 
-  i := Length(aRawString) - NumberOfDecimalPlaces;
-  if (i = 1) OR (i=2) then
-    seconds := Copy(aRawString, 1, i)
-  else if (i <= 0) then
-    seconds := ''
+  i := len - nodp;
+  if i in [1, 2] then
+  begin
+    seconds := Copy(aRawString, 1, i);
+    exit(FormatTime('', '', seconds, hundredths));
+  end
   else
-    seconds := Copy(aRawString, Length(aRawString) - NumberOfDecimalPlaces - 2, 2) ;
+    seconds := Copy(aRawString, len - nodp - 1, 2);
 
-  i := Length(aRawString) - NumberOfDecimalPlaces - 2;
-  if (i = 1) OR (i=2) then
-    minutes := Copy(aRawString, Length(aRawString) - NumberOfDecimalPlaces - i, i)
-  else if (i <= 0) then
-    minutes := ''
+  i := len - nodp - 2;
+  if i in [1, 2] then
+  begin
+    minutes := Copy(aRawString, 1, i);
+    exit(FormatTime('', minutes, seconds, hundredths));
+  end
   else
-    minutes := Copy(aRawString, Length(aRawString) - NumberOfDecimalPlaces - 4, 2) ;
+    minutes := Copy(aRawString, len - nodp - 3, 2);
 
-  i := Length(aRawString) - NumberOfDecimalPlaces - 4;
-  if (i = 1) OR (i=2) then
-    hours := Copy(aRawString, Length(aRawString) - NumberOfDecimalPlaces - i, i)
-  else if (i <= 0) then
-    hours := ''
-  else
-    hours := Copy(aRawString, Length(aRawString) - NumberOfDecimalPlaces - 6, 2) ;
+  i := len - nodp - 4;
+  if i in [1, 2] then
+  begin
+    hours := Copy(aRawString, 1, i);
+    exit(FormatTime(hours, minutes, seconds, hundredths));
+  end;
 
-  s := '';
-  if (Length(Hours)>0) then
-  s := s + Hours + ':';
-  if (Length(Minutes)>0) then
-  s := s + Minutes + ':';
-  if (Length(Seconds)>0) then
-  s := s + Seconds + '.';
-  if (Length(hundredths)>0) then
-  s := s + hundredths;
-
-  result := s;
-
+  result := FormatTime('', minutes, seconds, hundredths);
 end;
 
 function TTimeKeeper.GetRawRaceTime(RaceTimeStr: string): string;
 var
-s: string;
-NumberOfDecimalPlaces, i: integer;
+  s: string;
+  nodp: Integer;
 begin
   // takes RaceTimeStr given by dbo.Entrant and strips down
   // to raw numbers.
   s := RaceTimeStr;
-  // remove colons
-  s := StringReplace(s, ':', '', [rfReplaceAll]);
-  // remove colons
-  s := StringReplace(s, '.', '', [rfReplaceAll]);
-  // remove leading zeros
-  while (Length(s) > 0) and (s[1] = '0') do
-    Delete(s, 1, 1);
-  // remove spaces
-  s := Trim(s);
-  // three decimal places are displayed in string
-  NumberOfDecimalPlaces := Round(spinbNumOfDecimalPlaces.Value);
-  i := 3 - NumberOfDecimalPlaces;
-  Delete(s, Length(s) - i, i);
+
+  // three decimal places are used in the RaceTimeStr string
+  nodp := Round(spinbNumOfDecimalPlaces.Value);
+  if nodp = 0 then
+    Delete(s, Length(s) - 2, 3); // remove all decimal place chars.
+  if nodp = 1 then
+    Delete(s, Length(s) - 1, 2); // last two chars'
+  if nodp = 2 then
+    Delete(s, Length(s), 1); // single character.
+
+  StripTimeChars(s);
 
   result := s;
 end;
@@ -769,7 +934,7 @@ begin
   edtServerName.Text := Settings.Server;
   edtUser.Text := Settings.User;
   edtPassword.Text := Settings.Password;
-  chkbUseOSAuthentication.IsChecked := Settings.OSAuthent;
+  chkbUseOsAuthentication.IsChecked := Settings.OSAuthent;
   chkbSessionVisibility.IsChecked := Settings.SessionVisibility;
   chkbLockToLane.IsChecked := Settings.LockToLane;
   fLoginTimeOut := Settings.LoginTimeOut;
@@ -798,6 +963,7 @@ var
   Hour, Min, Sec, MSec: Word;
 
 begin
+  lblConnectionStatus.Text := '';
   if Assigned(SCM) and SCM.IsActive then
   begin
     // only opened heats can be cleared ...
@@ -883,7 +1049,7 @@ begin
               SCM.qryEntrant.EnableControls;
 
               // CLEAR TEXT - FOR USER FEEDBACK
-              txtRaceTime.Text := '';
+              // txtRaceTime.Text := '';
 
               // updates the label lblRaceTime
               // this will indicate to the use that the value
@@ -904,7 +1070,7 @@ begin
               MessageBeep(MB_ICONERROR);
 {$ENDIF}
               lblConnectionStatus.Text :=
-                'Error: Unable to post to the SCM database!'
+                'ERROR: Unable to post to the SCM database!'
             end;
           end;
 
@@ -916,7 +1082,7 @@ begin
           MessageBeep(MB_ICONERROR);
 {$ENDIF}
           lblConnectionStatus.Text :=
-            'Error: Invalid RaceTime. Please check input.';
+            'ERROR: Invalid RaceTime. Please check input.';
         end;
 
       end; // END : 'Are there entrants?'
@@ -1029,12 +1195,25 @@ begin
   Refresh_EntrantRaceTime;
 end;
 
+procedure TTimeKeeper.StripTimeChars(var s: string);
+begin
+  // remove colons
+  s := StringReplace(s, ':', '', [rfReplaceAll]);
+  // remove colons
+  s := StringReplace(s, '.', '', [rfReplaceAll]);
+  // remove leading zeros
+  while (Length(s) > 0) and (s[1] = '0') do
+    Delete(s, 1, 1);
+  // remove spaces
+  s := Trim(s);
+end;
+
 procedure TTimeKeeper.SaveToSettings;
 begin
   Settings.Server := edtServerName.Text;
   Settings.User := edtUser.Text;
   Settings.Password := edtPassword.Text;
-  if chkbUseOSAuthentication.IsChecked then
+  if chkbUseOsAuthentication.IsChecked then
     Settings.OSAuthent := true
   else
     Settings.OSAuthent := false;
@@ -1085,7 +1264,8 @@ begin
     cmbSessionList.Items.Clear;
     SCM.qrySession.Close;
     // ASSIGN PARAM to display or hide CLOSED sessions
-    SCM.qrySession.ParamByName('HIDECLOSED').AsBoolean := chkbSessionVisibility.IsChecked;
+    SCM.qrySession.ParamByName('HIDECLOSED').AsBoolean :=
+      chkbSessionVisibility.IsChecked;
     SCM.qrySession.Prepare;
     SCM.qrySession.Open;
     SCM.qrySession.EnableControls
@@ -1096,7 +1276,8 @@ begin
   begin
     // qrySession ISN'T ACTIVE ....
     // update state of qryLane PARAM
-    SCM.qrySession.ParamByName('HIDECLOSED').AsBoolean := chkbSessionVisibility.IsChecked;
+    SCM.qrySession.ParamByName('HIDECLOSED').AsBoolean :=
+      chkbSessionVisibility.IsChecked;
   end;
 
 end;
@@ -1150,7 +1331,7 @@ begin
         Refresh_Lane;
         // TODO
         // Big buttons are NOT DATA-AWARE. Refresh 'QUALIFICATION STATUS'
-//        Refresh_BigButtons;
+        // Refresh_BigButtons;
       end;
   end;
 end;
