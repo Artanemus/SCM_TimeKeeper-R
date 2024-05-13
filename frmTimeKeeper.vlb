@@ -27,10 +27,6 @@ Coordinates=411,42,90,51
 Coordinates=544,232,78,33
 Visible=False
 
-[Label5]
-Coordinates=544,771,46,33
-Visible=False
-
 [ListViewEvent]
 Coordinates=1001,76,89,141
 
@@ -88,10 +84,6 @@ Visible=False
 Coordinates=693,1024,61,33
 Visible=False
 
-[layStoredRaceTime]
-Coordinates=674,1073,109,33
-Visible=False
-
 [lblHeat]
 Coordinates=420,90,48,33
 Visible=False
@@ -102,10 +94,6 @@ Visible=False
 
 [Label18]
 Coordinates=730,570,52,33
-Visible=False
-
-[layLane]
-Coordinates=693,1128,52,33
 Visible=False
 
 [BindingsList1]
@@ -259,8 +247,8 @@ Coordinates=1092,988,41,51
 Coordinates=696,988,41,51
 
 []
-Coordinates=200,440,109,33
-Visible=True
+Coordinates=693,1128,52,33
+Visible=False
 
 [Label1]
 Coordinates=769,988,46,51
@@ -376,12 +364,20 @@ Coordinates=920,881,85,51
 [imgBackSpaceCntrl]
 Coordinates=166,824,111,51
 
-[Button1]
-Coordinates=345,395,53,51
-
 [btnClear]
 Coordinates=1007,988,51,51
 
 [txtRaceTime]
 Coordinates=109,334,78,51
+
+[btnPost]
+Coordinates=345,395,53,51
+
+[layTitleRaceTime]
+Coordinates=674,1073,109,33
+Visible=False
+
+[lblTitleRaceTime]
+Coordinates=544,771,46,33
+Visible=False
 

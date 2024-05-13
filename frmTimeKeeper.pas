@@ -65,7 +65,7 @@ type
     Label1: TLabel;
     Label12: TLabel;
     Label18: TLabel;
-    Label5: TLabel;
+    lblTitleRaceTime: TLabel;
     Label7: TLabel;
     Label8: TLabel;
     Label9: TLabel;
@@ -76,7 +76,6 @@ type
     layEventHeat: TLayout;
     layEventHeatTitleBar: TLayout;
     layFooter: TLayout;
-    layLane: TLayout;
     layLoginToServer: TLayout;
     layPersonalBest: TLayout;
     layRaceTime: TLayout;
@@ -86,7 +85,7 @@ type
     layRaceTimeText: TLayout;
     layRaceTimeTitleBar: TLayout;
     laySelectSession: TLayout;
-    layStoredRaceTime: TLayout;
+    layTitleRaceTime: TLayout;
     layTabs: TLayout;
     layTimeToBeat: TLayout;
     lblAniIndicatorStatus: TLabel;
@@ -126,7 +125,7 @@ type
     btnBackSpace: TButton;
     imgBackSpaceCntrl: TImageControl;
     txtRaceTime: TLabel;
-    Button1: TButton;
+    btnPost: TButton;
     btnGetTime: TButton;
     ImageControl2: TImageControl;
     spinbNumOfDecimalPlaces: TSpinBox;
@@ -135,6 +134,7 @@ type
     Rectangle1: TRectangle;
     btnClearTime: TButton;
     layRace_Time: TLayout;
+    layEntrantStats: TLayout;
     procedure actnConnectExecute(Sender: TObject);
     procedure actnConnectUpdate(Sender: TObject);
     procedure actnDisconnectExecute(Sender: TObject);
@@ -149,7 +149,6 @@ type
     procedure btnClearTimeClick(Sender: TObject);
     procedure btnGetTimeClick(Sender: TObject);
     procedure btnPointClick(Sender: TObject);
-    procedure chkbLockToLaneChange(Sender: TObject);
     procedure chkbSessionVisibilityChange(Sender: TObject);
     procedure cmbSessionListChange(Sender: TObject);
     procedure cmbSwimClubListChange(Sender: TObject);
@@ -171,7 +170,7 @@ type
   var
     fConnectionCountdown: Integer;
     fLoginTimeOut: Integer;
-    fIN: String;
+    fNumOfLanes: Integer;
 
     procedure btnBKSClickTerminate(Sender: TObject);
     procedure ConnectOnTerminate(Sender: TObject);
@@ -185,12 +184,14 @@ type
     procedure Update_Layout;
     procedure Update_SessionVisibility;
     procedure Update_TabSheetCaptions;
+    procedure Update_EntrantStat;
     function GetDisplayRaceTime(aRawString: string): string;
     function GetRawRaceTime(RaceTimeStr: string): string;
+    procedure StickToLane;
 
   public
     { Public declarations }
-    procedure Refresh_EntrantRaceTime;
+    procedure Refresh_Entrant;
     procedure Refresh_Lane;
   end;
 
@@ -225,10 +226,8 @@ begin
     AniIndicator1.Visible := true; // progress timer
     AniIndicator1.Enabled := true; // start spinning
     lblAniIndicatorStatus.Visible := true; // a label with countdown
-    // lock this button - so user won't start another thread!
-    btnConnect.Enabled := false;
     Timer1.Enabled := true; // start the countdown
-
+    actnConnect.Visible := false;
     application.ProcessMessages;
 
     Thread := TThread.CreateAnonymousThread(
@@ -243,7 +242,6 @@ begin
         sc.SimpleMakeTemporyConnection(edtServerName.Text, edtUser.Text,
           edtPassword.Text, chkbUseOsAuthentication.IsChecked);
         Timer1.Enabled := false;
-        actnConnect.Enabled := true;
         sc.Free
       end);
     Thread.OnTerminate := ConnectOnTerminate;
@@ -308,13 +306,9 @@ end;
 
 procedure TTimeKeeper.actnPostTimeExecute(Sender: TObject);
 begin
-  // Post RaceTime to the database
-  // Check for connection
   if (Assigned(SCM) and SCM.IsActive) then
   begin
-    // if the heat is closed or raced - then
-    // if the session is closed - then
-    // the racetime can't be updated ...
+    // Test if the heat is closed or raced or session is closed .
     if ((SCM.qryHeat.FieldByName('HeatStatusID').AsInteger <> 1) or
       (SCM.qrySession.FieldByName('SessionStatusID').AsInteger <> 1)) then
     begin
@@ -325,14 +319,10 @@ begin
         'Failed to PostTime because the session/heat is locked/closed.';
     end
     else
-      PostRaceTime; // routine will post and display a status message
-
-    // Update the entrants details.
-    // Get the server to ECHO the QUALIFIED STATUS.
-    // ie. VISIBLE confirmation that it was POSTED.
-    // append a '(Disqualified)' or '(Scratched)' to the
-    // FName in the lane listview
-    Refresh_Lane;
+    begin
+      PostRaceTime; // Extract TDateTime, post and display status message.
+      bsEntrant.DataSet.Refresh; // display changes in lblRaceTime.
+    end;
   end
 end;
 
@@ -474,13 +464,6 @@ begin
     KeyDown(Key, KeyChar, ShiftState);
 end;
 
-procedure TTimeKeeper.chkbLockToLaneChange(Sender: TObject);
-begin
-  // TODO ....
-  // if (Assigned(SCM) and SCM.scmConnection.Connected) then
-  // Update_LockToLane();
-end;
-
 procedure TTimeKeeper.chkbSessionVisibilityChange(Sender: TObject);
 begin
   if (Assigned(SCM) and SCM.scmConnection.Connected) then
@@ -490,14 +473,19 @@ end;
 procedure TTimeKeeper.ClearRaceTime;
 begin
   lblConnectionStatus.Text := '';
-  if not Assigned(SCM) then exit;
-  if not SCM.IsActive then exit;
+  if not Assigned(SCM) then
+    exit;
+  if not SCM.IsActive then
+    exit;
   // session cannot be locked.
-  if not (SCM.qrySession.FieldByName('SessionStatusID').AsInteger = 1) then exit;
+  if not(SCM.qrySession.FieldByName('SessionStatusID').AsInteger = 1) then
+    exit;
   // only opened or raced heats can be cleared ...
-  if (SCM.qryHeat.FieldByName('HeatStatusID').AsInteger = 3) then exit;
+  if (SCM.qryHeat.FieldByName('HeatStatusID').AsInteger = 3) then
+    exit;
   // Is there an ENTRANT.
-  if SCM.qryLane.FieldByName('MemberID').IsNull then exit;
+  if SCM.qryLane.FieldByName('MemberID').IsNull then
+    exit;
   if not SCM.qryEntrant.FieldByName('EntrantID').IsNull then
   begin
     try
@@ -507,7 +495,7 @@ begin
         SCM.qryEntrant.FieldByName('RaceTime').Clear;
         SCM.qryEntrant.Post;
         SCM.qryEntrant.EnableControls;
-        Refresh_EntrantRaceTime;
+        Refresh_Entrant;
 {$IFDEF MSWINDOWS}
         MessageBeep(MB_ICONINFORMATION);
 {$ENDIF}
@@ -588,6 +576,10 @@ begin
     lblConnectionStatus.Text := lblConnectionStatus.Text + GetSCMVerInfo();
     lblConnectionStatus.Text := lblConnectionStatus.Text + sLineBreak +
       bsSwimClub.DataSet.FieldByName('Caption').AsString;
+
+    fNumOfLanes := bsSwimClub.DataSet.FieldByName('NumOfLanes').AsInteger;
+    if (fNumOfLanes > 0) then
+      spinboxLockToLane.Max := fNumOfLanes;
   end;
 
   // VERY SICK OF BIND COMPONETS BREAKING!
@@ -620,6 +612,7 @@ begin
   UpdateAction(actnConnect);
   // Display of layout panels (holding TListView grids).
   Update_Layout;
+
 
 end;
 
@@ -685,6 +678,7 @@ begin
   fConnectionCountdown := fLoginTimeOut;
   chkbLockToLane.IsChecked := false;
   txtRaceTime.Text := '';
+  fNumOfLanes := 8;
 
   // A Class that uses JSON to read and write application configuration
   if Settings = nil then
@@ -708,6 +702,7 @@ begin
 
   // Connection status - located in footer bar.
   lblConnectionStatus.Text := 'NOT CONNECTED';
+
 
 end;
 
@@ -919,14 +914,11 @@ end;
 
 procedure TTimeKeeper.ListViewLaneChange(Sender: TObject);
 begin
-  Refresh_EntrantRaceTime;
-  // TODO.
-  // -----------------------------------------
-  //
-  // -----------------------------------------
-  // ASSERT button state
-  UpdateAction(actnPostTime);
-  Update_TabSheetCaptions;
+  Update_EntrantStat; // Empty lanes don't show entrant stats.
+  // S T A T U S   L I N E   E V E N T   D E S C R I P T I O  N  .
+  // Distance Stroke, NOM and ENT count ....
+  lblConnectionStatus.Text := bsEvent.DataSet.FieldByName
+    ('ListDetailStr').AsString;
 end;
 
 procedure TTimeKeeper.LoadFromSettings;
@@ -938,6 +930,7 @@ begin
   chkbSessionVisibility.IsChecked := Settings.SessionVisibility;
   chkbLockToLane.IsChecked := Settings.LockToLane;
   fLoginTimeOut := Settings.LoginTimeOut;
+  spinboxLockToLane.Value := Settings.LockToLaneNumber;
 end;
 
 procedure TTimeKeeper.LoadSettings;
@@ -1054,7 +1047,7 @@ begin
               // updates the label lblRaceTime
               // this will indicate to the use that the value
               // was successfully into the database ...
-              Refresh_EntrantRaceTime;
+//              Refresh_Entrant;
 {$IFDEF MSWINDOWS}
               MessageBeep(MB_ICONINFORMATION);
 {$ENDIF}
@@ -1090,80 +1083,64 @@ begin
   end;
 end;
 
-procedure TTimeKeeper.Refresh_EntrantRaceTime;
+procedure TTimeKeeper.Refresh_Entrant;
 var
   EntrantID, HeatID: Integer;
 begin
-  // Tidy up interface. No connection - selected entrant controls are hidden.
-  // Controls are hidden/revealed by design stack order else layout changes.
-  //
-  layStoredRaceTime.Visible := false;
-  layPersonalBest.Visible := false;
-  layTimeToBeat.Visible := false;
-  layEntrantName.Visible := false;
+  { Tidy up interface. No connection - selected entrant controls are hidden.
+    Controls are hidden/revealed by design stack order else layout changes. }
 
   if (Assigned(SCM) and SCM.IsActive) then
   begin
-    SCM.qryEntrant.DisableControls;
-    // store the current database record indexes
-    EntrantID := SCM.qryLane.FieldByName('EntrantID').AsInteger;
-    HeatID := SCM.qryLane.FieldByName('HeatID').AsInteger;
+    { Note:
+      Each time qryLane is closed, then re-assigned parameters, prepared
+      and finally reopened ... FlagLane is set true.
+      This ONLY occurs at ...
+      procedure TSCM.qryHeatAfterScroll(DataSet: TDataSet);
 
+      This flag was created to OPTIMIZE listview updates.
+      (closing and re-opening qryEntrant is a little slow).
+    }
+    if SCM.FlagLane then
+    begin
+      SCM.qryEntrant.DisableControls;
+      // store the current database record indexes
+      EntrantID := 0;
+      if (not SCM.qryLane.IsEmpty) then
+      begin
+        // L O C K   T O   L A N E . F I N D   E N T R A N T .
+        if (chkbLockToLane.IsChecked) then
+        begin
+          SCM.LocateLaneNum(Round(spinboxLockToLane.Value));
+          EntrantID := SCM.qryLane.FieldByName('EntrantID').AsInteger;
+        end
+        else
+         EntrantID := SCM.qryLane.FieldByName('EntrantID').AsInteger
+      end;
+
+      SCM.qryEntrant.Close;
+      SCM.qryEntrant.Open;
+      SCM.FlagLane := false;
+
+      // C U E   T O   E N T R A N T .
+      // EntrantID = 0 is OK, just no cueing ....
+      HeatID := SCM.qryHeat.FieldByName('HeatID').AsInteger;
+      SCM.LocateEntrantID(EntrantID, HeatID);
+
+      SCM.qryEntrant.EnableControls;
+    end
+    else
+      SCM.qryEntrant.Refresh;
+
+    layEntrantStats.Visible := false;
     // Any heats for this event?
     if (not SCM.qryHeat.IsEmpty) then
     begin
       // Is there a swimmer assigned to the lane?
-      if not(SCM.qryLane.FieldByName('MemberID').IsNull) then
-      begin
-        // SWIMMER IN LANE - SHOW ALL ENTRANT DETAILS
-        layEntrantName.Visible := true;
-        layTimeToBeat.Visible := true;
-        layPersonalBest.Visible := true;
-        layStoredRaceTime.Visible := true;
-      end
-      else
-      begin
-        // SHOW HEAT AND LANE
-        // Selected controls remain hidden.
-      end;
-    end;
-    //
-    // Note: The Refresh method does not work for all TDataSet descendants.
-    // In particular, TQuery components do not support the Refresh method if
-    // the query is not "live".
-    // To refresh a static TQuery, close and reopen the dataset.
-    //
-    // Each time qryLane is closed, then re-assigned parameters, prepared
-    // and finally reopened ... FlagLane is set true.
-    // This ONLY occurs at ...
-    // procedure TSCM.qryHeatAfterScroll(DataSet: TDataSet);
-    //
-    // NOTE: This flag was created to OPTIMIZE listview updates.
-    // (closing and re-opening qryEntrant is a little slow).
-    if SCM.FlagLane then
-    begin
-      // qryLane was trashed :: full requery required
-      SCM.qryEntrant.Close;
-      SCM.qryEntrant.Open;
-      // reset the flag
-      SCM.FlagLane := false;
+      if not (SCM.qryLane.FieldByName('MemberID').IsNull) then
+        layEntrantStats.Visible := true;
     end;
 
-    // stick to a single swimming lane.
-    if (chkbLockToLane.IsChecked) then
-    begin
-      SCM.LocateLaneNum(Round(spinboxLockToLane.Value));
-      // update the entrant param
-      EntrantID := SCM.qryLane.FieldByName('EntrantID').AsInteger;
-      // SAFE: ZERO values.
-      SCM.LocateEntrantID(EntrantID, HeatID);
-    end
-    else
-    begin
-      // SAFE: ZERO values.
-      SCM.LocateEntrantID(EntrantID, HeatID);
-    end;
-    SCM.qryEntrant.EnableControls;
   end;
 end;
 
@@ -1192,7 +1169,28 @@ begin
     SCM.qryEntrant.EnableControls;
   end;
   // NOTE: qryEntrant is parented to qryLane but need re-painting.
-  Refresh_EntrantRaceTime;
+  Refresh_Entrant;
+end;
+
+procedure TTimeKeeper.StickToLane;
+var
+  EntrantID, HeatID: integer;
+begin
+  if not chkbLockToLane.IsChecked then exit;
+  if not Assigned(SCM) then exit;
+  if SCM.qryHeat.IsEmpty then exit;
+  if SCM.qryLane.IsEmpty then exit;
+
+  // L O C K   T O   L A N E . C U E   T O   E N T R A N T .
+  SCM.qryLane.DisableControls;
+  SCM.qryEntrant.DisableControls;
+  SCM.LocateLaneNum(Round(spinboxLockToLane.Value));
+  HeatID := SCM.qryHeat.FieldByName('HeatID').AsInteger;
+  EntrantID := SCM.qryLane.FieldByName('EntrantID').AsInteger;
+  SCM.LocateEntrantID(EntrantID, HeatID);
+  SCM.qryEntrant.EnableControls;
+  SCM.qryLane.EnableControls;
+
 end;
 
 procedure TTimeKeeper.StripTimeChars(var s: string);
@@ -1220,7 +1218,20 @@ begin
   Settings.SessionVisibility := chkbSessionVisibility.IsChecked;
   Settings.LockToLane := chkbLockToLane.IsChecked;
   Settings.LoginTimeOut := fLoginTimeOut;
-  Settings.SaveToFile;
+  Settings.LockToLaneNumber := Round(spinboxLockToLane.Value);
+  Settings.SaveToFile();
+end;
+
+procedure TTimeKeeper.Update_EntrantStat;
+begin
+    layEntrantStats.Visible := false;
+    // Any heats for this event?
+    if (not SCM.qryHeat.IsEmpty) then
+    begin
+      // Is there a swimmer assigned to the lane?
+      if not (SCM.qryLane.FieldByName('MemberID').IsNull) then
+        layEntrantStats.Visible := true;
+    end;
 end;
 
 procedure TTimeKeeper.Update_Layout;
@@ -1325,13 +1336,13 @@ begin
   case TabControl1.TabIndex of
     0:
       lblConnectionStatus.Text := '';
+    1:
+      lblConnectionStatus.Text := '';
     2:
       begin
         lblConnectionStatus.Text := '';
-        Refresh_Lane;
-        // TODO
-        // Big buttons are NOT DATA-AWARE. Refresh 'QUALIFICATION STATUS'
-        // Refresh_BigButtons;
+        StickToLane;
+        Update_EntrantStat;  // empty heats don't show Entrant Stats
       end;
   end;
 end;

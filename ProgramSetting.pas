@@ -25,6 +25,7 @@ type
     SessionVisibility: boolean;
     LockToLane: boolean;
     LoginTimeOut: integer;
+    LockToLaneNumber: integer;
 
     constructor Create();
     function GetDefaultSettingsFilename(): string;
@@ -52,6 +53,7 @@ begin
   SessionVisibility := true;
   LockToLane := false;
   LoginTimeOut := CONNECTIONTIMEOUT;
+  LockToLaneNumber := 1;
 
   {
   ForceDirectories creates a new directory as specified in Dir,
