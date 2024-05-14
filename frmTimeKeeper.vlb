@@ -8,10 +8,6 @@ Coordinates=693,419,97,33
 Coordinates=693,232,71,33
 Visible=False
 
-[lblConnectionStatus]
-Coordinates=710,390,114,33
-Visible=False
-
 [layRaceTimeText]
 Coordinates=693,474,98,33
 Visible=False
@@ -379,5 +375,9 @@ Visible=False
 
 [lblTitleRaceTime]
 Coordinates=544,771,46,33
+Visible=False
+
+[lblStatusBar]
+Coordinates=710,390,114,33
 Visible=False
 

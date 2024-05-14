@@ -89,7 +89,7 @@ type
     layTabs: TLayout;
     layTimeToBeat: TLayout;
     lblAniIndicatorStatus: TLabel;
-    lblConnectionStatus: TLabel;
+    lblStatusBar: TLabel;
     lblEntrantName: TLabel;
     lblEvent: TLabel;
     lblHeat: TLabel;
@@ -135,6 +135,7 @@ type
     btnClearTime: TButton;
     layRace_Time: TLayout;
     layEntrantStats: TLayout;
+    Rectangle2: TRectangle;
     procedure actnConnectExecute(Sender: TObject);
     procedure actnConnectUpdate(Sender: TObject);
     procedure actnDisconnectExecute(Sender: TObject);
@@ -157,6 +158,8 @@ type
       var KeyChar: Char; Shift: TShiftState);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+    procedure FormKeyDown(Sender: TObject; var Key: Word; var KeyChar: WideChar;
+        Shift: TShiftState);
     procedure ListViewEventChange(Sender: TObject);
     procedure ListViewHeatChange(Sender: TObject);
     procedure ListViewLaneChange(Sender: TObject);
@@ -164,15 +167,14 @@ type
     procedure Timer1Timer(Sender: TObject);
   private const
     CONNECTIONTIMEOUT = 48;
-    procedure StripTimeChars(var s: string);
-    function GetDisplayRaceTimeALT(aRawString: string): string;
-
   var
     fConnectionCountdown: Integer;
     fLoginTimeOut: Integer;
     fNumOfLanes: Integer;
 
-    procedure btnBKSClickTerminate(Sender: TObject);
+    procedure Status_ConnectionDescription;
+    procedure StripTimeChars(var s: string);
+    procedure TruncateTimeChars(var s: string; nodp: integer = 2);
     procedure ConnectOnTerminate(Sender: TObject);
     function GetSCMVerInfo(): string;
 
@@ -185,6 +187,7 @@ type
     procedure Update_SessionVisibility;
     procedure Update_TabSheetCaptions;
     procedure Update_EntrantStat;
+    procedure Status_EventDescription;
     function GetDisplayRaceTime(aRawString: string): string;
     function GetRawRaceTime(RaceTimeStr: string): string;
     procedure StickToLane;
@@ -274,7 +277,7 @@ begin
   begin
     SCM.DeActivateTable;
     SCM.scmConnection.Connected := false;
-    lblConnectionStatus.Text := 'No connection.';
+    lblStatusBar.Text := 'No connection.';
   end;
   AniIndicator1.Visible := false;
   lblAniIndicatorStatus.Visible := false;
@@ -315,7 +318,7 @@ begin
 {$IFDEF MSWINDOWS}
       MessageBeep(MB_ICONERROR);
 {$ENDIF}
-      lblConnectionStatus.Text :=
+      lblStatusBar.Text :=
         'Failed to PostTime because the session/heat is locked/closed.';
     end
     else
@@ -364,7 +367,7 @@ begin
     HeatID := SCM.qryHeat.FieldByName('HeatID').AsInteger;
     // run the queries
     SCM.qryEvent.Refresh;
-    lblConnectionStatus.Text := 'SCM Refreshed.';
+    lblStatusBar.Text := 'SCM Refreshed.';
     // restore database record indexes
     SCM.LocateEventID(EventID);
     SCM.LocateHeatID(HeatID);
@@ -390,6 +393,7 @@ begin
   s := txtRaceTime.Text;
   s := s + TButton(Sender).Text;
   StripTimeChars(s);
+  TruncateTimeChars(s, ROUND(spinbNumOfDecimalPlaces.Value));
   s := GetDisplayRaceTime(s);
   txtRaceTime.Text := s;
 end;
@@ -399,18 +403,12 @@ var
   s: string;
 begin
   s := txtRaceTime.Text;
-  s := s + TButton(Sender).Text;
   StripTimeChars(s);
   Delete(s, Length(s), 1);
   s := GetDisplayRaceTime(s);
   txtRaceTime.Text := s;
 end;
 
-procedure TTimeKeeper.btnBKSClickTerminate(Sender: TObject);
-begin
-  txtRaceTime.SetFocus;
-  txtRaceTime.Repaint;
-end;
 
 procedure TTimeKeeper.btnClearClick(Sender: TObject);
 begin
@@ -428,7 +426,7 @@ begin
 {$IFDEF MSWINDOWS}
       MessageBeep(MB_ICONERROR);
 {$ENDIF}
-      lblConnectionStatus.Text :=
+      lblStatusBar.Text :=
         'Failed to Clear Time because the session/heat is locked/closed.';
     end
     else
@@ -472,7 +470,7 @@ end;
 
 procedure TTimeKeeper.ClearRaceTime;
 begin
-  lblConnectionStatus.Text := '';
+  lblStatusBar.Text := '';
   if not Assigned(SCM) then
     exit;
   if not SCM.IsActive then
@@ -499,7 +497,7 @@ begin
 {$IFDEF MSWINDOWS}
         MessageBeep(MB_ICONINFORMATION);
 {$ENDIF}
-        lblConnectionStatus.Text :=
+        lblStatusBar.Text :=
           'INFO: The RaceTime was successfully cleared.';
       end
     except
@@ -509,7 +507,7 @@ begin
 {$IFDEF MSWINDOWS}
         MessageBeep(MB_ICONERROR);
 {$ENDIF}
-        lblConnectionStatus.Text :=
+        lblStatusBar.Text :=
           'ERROR: Unable to clear time to the SCM database!'
       end;
     end;
@@ -526,6 +524,7 @@ begin
       bsHeat.DataSet.First;
     end;
     Update_TabSheetCaptions;
+    lblStatusBar.Text := '';
   end;
 end;
 
@@ -540,6 +539,7 @@ begin
       bsHeat.DataSet.First;
     end;
     Update_TabSheetCaptions;
+    lblStatusBar.Text := '';
   end;
 end;
 
@@ -571,11 +571,8 @@ begin
       // I N I T   L A N E   L I S T .
       Refresh_Lane;
     end;
-    // STATUS BAR CAPTION.
-    lblConnectionStatus.Text := 'Connected to SwimClubMeet. ';
-    lblConnectionStatus.Text := lblConnectionStatus.Text + GetSCMVerInfo();
-    lblConnectionStatus.Text := lblConnectionStatus.Text + sLineBreak +
-      bsSwimClub.DataSet.FieldByName('Caption').AsString;
+
+    Status_ConnectionDescription;
 
     fNumOfLanes := bsSwimClub.DataSet.FieldByName('NumOfLanes').AsInteger;
     if (fNumOfLanes > 0) then
@@ -602,7 +599,7 @@ begin
   if not SCM.scmConnection.Connected then
   begin
     // Attempt to connect failed.
-    lblConnectionStatus.Text :=
+    lblStatusBar.Text :=
       'A connection couldn''t be made. (Check you input values.)';
   end;
 
@@ -701,7 +698,7 @@ begin
   Update_Layout;
 
   // Connection status - located in footer bar.
-  lblConnectionStatus.Text := 'NOT CONNECTED';
+  lblStatusBar.Text := 'NOT CONNECTED';
 
 
 end;
@@ -719,89 +716,57 @@ begin
   end;
 end;
 
+procedure TTimeKeeper.FormKeyDown(Sender: TObject; var Key: Word;
+var KeyChar: WideChar; Shift: TShiftState);
+var
+s, keytxt: string;
+begin
+  if (TabControl1.TabIndex = 2) then
+  begin
+    if KeyChar IN ['0','1','2','3','4','5','6','7','8','9'] then
+//    if Key in [vkNumpad0, vkNumpad1, vkNumpad2, vkNumpad3, vkNumpad4, vkNumpad5,
+//      vkNumpad6, vkNumpad7, vkNumpad8, vkNumpad9,
+//      vk0, vk1, vk2, vk3, vk4, vk5, vk6, vk7, vk8, vk9] then
+    begin
+      s := txtRaceTime.Text;
+      // convert the Key value to char 1, 2, 3, 4, 5, 6,7 , 8, 9, 0
+//      if Key in [vkNumpad0, vkNumpad1, vkNumpad2, vkNumpad3, vkNumpad4, vkNumpad5,
+//      vkNumpad6, vkNumpad7, vkNumpad8, vkNumpad9] then
+//        keytxt := Chr(Key - vkNumpad0 + Ord('0'))
+//      else
+//        keytxt := Chr(Key - vk0 + Ord('0'));
+
+      s := s + keychar;
+      StripTimeChars(s);
+      TruncateTimeChars(s, ROUND(spinbNumOfDecimalPlaces.Value));
+      s := GetDisplayRaceTime(s);
+      txtRaceTime.Text := s;
+      Key := 0;
+    end;
+
+    if (KeyChar = 'C') or (KeyChar = 'c') then
+    begin
+      txtRaceTime.Text := '';
+      Key := 0;
+    end;
+
+    if (Key = vkBack) or (KeyChar = char(8)) then
+    begin
+      btnBackSpaceClick(Sender);
+//      s := txtRaceTime.Text;
+//      StripTimeChars(s);
+//      Delete(s, Length(s), 1);
+//      s := GetDisplayRaceTime(s);
+//      txtRaceTime.Text := s;
+    end;
+
+  end;
+end;
+
 function TTimeKeeper.GetDisplayRaceTime(aRawString: string): string;
 var
   nodp: Integer; // Number of decimal places.
   len, i: Integer; // length of raw string.
-  hours, minutes, seconds, hundredths, s: string;
-begin
-  if (aRawString = '') then // string is empty.
-  begin
-    result := '';
-    exit;
-  end;
-
-  nodp := Round(spinbNumOfDecimalPlaces.Value);
-  len := Length(aRawString);
-
-  if (nodp > 0) then
-  begin
-    if (len > nodp) then
-      hundredths := Copy(aRawString, len - nodp + 1, nodp)
-    else
-    begin
-      // len equal nodp or less : only hundredths to display
-      result := '.' + Copy(aRawString, 1, len);
-      exit;
-    end;
-  end
-  else
-    hundredths := ''; // decimal place not being used.
-
-  i := len - nodp; // number of chars after hundredths are removed.
-  if (i = 1) or (i = 2) then
-  begin
-    if i = 1 then
-      seconds := Copy(aRawString, 1, 1);
-    if i = 2 then
-      seconds := Copy(aRawString, 1, 2);
-    result := seconds + '.' + hundredths;
-    exit;
-  end
-  else
-    seconds := Copy(aRawString, len - nodp - 1, 2);
-
-  // number of chars after hundredths and seconds are removed.
-  i := len - nodp;
-  if (i = 3) OR (i = 4) then
-  begin
-    if i = 3 then
-      minutes := Copy(aRawString, 1, 1);
-    if i = 4 then
-      minutes := Copy(aRawString, 1, 2);
-    if (nodp = 0) then
-      result := minutes + ':' + seconds
-    else
-      result := minutes + ':' + seconds + '.' + hundredths;
-    exit;
-  end
-  else
-    minutes := Copy(aRawString, len - nodp - 3, 2);
-
-  // number of chars after hundredths, seconds and minute are removed.
-  i := len - nodp;
-  if (i = 5) OR (i = 6) then
-  begin
-    if i = 5 then
-      hours := Copy(aRawString, 1, 1);
-    if i = 6 then
-      hours := Copy(aRawString, 1, 2);
-    if (nodp = 0) then
-      result := hours + ':' + minutes + ':' + seconds
-    else
-      result := hours + ':' + minutes + ':' + seconds + '.' + hundredths;
-    exit;
-  end;
-  // no chars for hours - just return ...
-  if (nodp = 0) then
-    result := minutes + ':' + seconds
-  else
-    result := minutes + ':' + seconds + '.' + hundredths;
-end;
-
-function TTimeKeeper.GetDisplayRaceTimeALT(aRawString: string): string;
-var
-  nodp, len, i: Integer;
   hours, minutes, seconds, hundredths: string;
 
   function FormatTime(h, m, s, hund: string): string;
@@ -809,7 +774,12 @@ var
     if hund <> '' then
       hund := '.' + hund;
     if h = '' then
-      result := Format('%s:%s%s', [m, s, hund])
+    begin
+      if m = '' then
+        result := Format('%s%s', [s, hund])
+      else
+        result := Format('%s:%s%s', [m, s, hund]);
+    end
     else
       result := Format('%s:%s:%s%s', [h, m, s, hund]);
   end;
@@ -826,7 +796,7 @@ begin
     if len > nodp then
       hundredths := Copy(aRawString, len - nodp + 1, nodp)
     else
-      exit(Copy(aRawString, 1, len));
+      exit('.' + Copy(aRawString, 1, len));
   end
   else
     hundredths := '';
@@ -857,6 +827,7 @@ begin
   end;
 
   result := FormatTime('', minutes, seconds, hundredths);
+
 end;
 
 function TTimeKeeper.GetRawRaceTime(RaceTimeStr: string): string;
@@ -876,8 +847,6 @@ begin
     Delete(s, Length(s) - 1, 2); // last two chars'
   if nodp = 2 then
     Delete(s, Length(s), 1); // single character.
-
-  StripTimeChars(s);
 
   result := s;
 end;
@@ -905,11 +874,13 @@ end;
 procedure TTimeKeeper.ListViewEventChange(Sender: TObject);
 begin
   Update_TabSheetCaptions;
+  Status_EventDescription;
 end;
 
 procedure TTimeKeeper.ListViewHeatChange(Sender: TObject);
 begin
   Update_TabSheetCaptions;
+  Status_EventDescription;
 end;
 
 procedure TTimeKeeper.ListViewLaneChange(Sender: TObject);
@@ -917,8 +888,11 @@ begin
   Update_EntrantStat; // Empty lanes don't show entrant stats.
   // S T A T U S   L I N E   E V E N T   D E S C R I P T I O  N  .
   // Distance Stroke, NOM and ENT count ....
-  lblConnectionStatus.Text := bsEvent.DataSet.FieldByName
+  lblStatusBar.Text := bsEvent.DataSet.FieldByName
     ('ListDetailStr').AsString;
+
+  // setting focus onto tab enables form KeyDown ro function....
+  SetFocused(tabEntrantRaceTime);
 end;
 
 procedure TTimeKeeper.LoadFromSettings;
@@ -956,7 +930,7 @@ var
   Hour, Min, Sec, MSec: Word;
 
 begin
-  lblConnectionStatus.Text := '';
+  lblStatusBar.Text := '';
   if Assigned(SCM) and SCM.IsActive then
   begin
     // only opened heats can be cleared ...
@@ -1051,7 +1025,7 @@ begin
 {$IFDEF MSWINDOWS}
               MessageBeep(MB_ICONINFORMATION);
 {$ENDIF}
-              lblConnectionStatus.Text :=
+              lblStatusBar.Text :=
                 'INFO: The RaceTime was successfully posted.';
 
             end
@@ -1062,7 +1036,7 @@ begin
 {$IFDEF MSWINDOWS}
               MessageBeep(MB_ICONERROR);
 {$ENDIF}
-              lblConnectionStatus.Text :=
+              lblStatusBar.Text :=
                 'ERROR: Unable to post to the SCM database!'
             end;
           end;
@@ -1074,7 +1048,7 @@ begin
 {$IFDEF MSWINDOWS}
           MessageBeep(MB_ICONERROR);
 {$ENDIF}
-          lblConnectionStatus.Text :=
+          lblStatusBar.Text :=
             'ERROR: Invalid RaceTime. Please check input.';
         end;
 
@@ -1172,6 +1146,32 @@ begin
   Refresh_Entrant;
 end;
 
+procedure TTimeKeeper.Status_ConnectionDescription;
+begin
+  if Assigned(SCM) and SCM.IsActive then
+  begin
+    // STATUS BAR CAPTION.
+    lblStatusBar.Text := 'Connected to SwimClubMeet. ';
+    lblStatusBar.Text := lblStatusBar.Text + GetSCMVerInfo;
+    lblStatusBar.Text := lblStatusBar.Text + sLineBreak +
+      bsSwimClub.DataSet.FieldByName('Caption').AsString;
+  end;
+end;
+
+procedure TTimeKeeper.Status_EventDescription;
+begin
+  if Assigned(SCM) and SCM.IsActive then
+  begin
+    // S T A T U S   L I N E .
+    // E V E N T   D E S C R I P T I O  N  .
+    // Distance Stroke, NOM and ENT count ....
+    lblStatusBar.Text := bsEvent.DataSet.FieldByName
+      ('ListDetailStr').AsString;
+  end
+  else
+      lblStatusBar.Text := '';
+end;
+
 procedure TTimeKeeper.StickToLane;
 var
   EntrantID, HeatID: integer;
@@ -1194,6 +1194,7 @@ begin
 end;
 
 procedure TTimeKeeper.StripTimeChars(var s: string);
+
 begin
   // remove colons
   s := StringReplace(s, ':', '', [rfReplaceAll]);
@@ -1204,6 +1205,7 @@ begin
     Delete(s, 1, 1);
   // remove spaces
   s := Trim(s);
+
 end;
 
 procedure TTimeKeeper.SaveToSettings;
@@ -1224,14 +1226,13 @@ end;
 
 procedure TTimeKeeper.Update_EntrantStat;
 begin
-    layEntrantStats.Visible := false;
-    // Any heats for this event?
-    if (not SCM.qryHeat.IsEmpty) then
-    begin
-      // Is there a swimmer assigned to the lane?
-      if not (SCM.qryLane.FieldByName('MemberID').IsNull) then
-        layEntrantStats.Visible := true;
-    end;
+  layEntrantStats.Visible := false;
+  if Assigned(SCM) and SCM.IsActive then
+  begin
+    // Is there a swimmer assigned to the lane?
+    if not(SCM.qryLane.FieldByName('MemberID').IsNull) then
+      layEntrantStats.Visible := true;
+  end;
 end;
 
 procedure TTimeKeeper.Update_Layout;
@@ -1298,7 +1299,6 @@ begin
   if Assigned(SCM) and SCM.scmConnection.Connected then
   begin
     // T A B   S H E E T  C A P T I O N .
-    // E V E N T   . .   H E A T .
     if bsEvent.DataSet.IsEmpty then
       tabEventHeat.Text := 'Empty'
     else
@@ -1312,37 +1312,26 @@ begin
         tabEventHeat.Text := tabEventHeat.Text + 'Heat.' +
           bsHeat.DataSet.FieldByName('HeatNum').AsString;
     end;
-
-    // S T A T U S   L I N E .
-    if (bsHeat.DataSet.FieldByName('HeatStatusID').AsInteger <> 1) then
-      lblConnectionStatus.Text := 'INFO: The heat is raced or closed.'
-    else
-      // E V E N T   D E S C R I P T I O  N  .
-      // Distance Stroke, NOM and ENT count ....
-      lblConnectionStatus.Text := bsEvent.DataSet.FieldByName
-        ('ListDetailStr').AsString;
   end
   else
   begin
-    lblConnectionStatus.Text := '';
     tabEventHeat.Text := 'Event-Heat';
     tabEntrantRaceTime.Text := 'Entrant-RaceTime';
   end;
-
 end;
 
 procedure TTimeKeeper.TabControl1Change(Sender: TObject);
 begin
   case TabControl1.TabIndex of
     0:
-      lblConnectionStatus.Text := '';
+      Status_ConnectionDescription;
     1:
-      lblConnectionStatus.Text := '';
+      Status_EventDescription;
     2:
       begin
-        lblConnectionStatus.Text := '';
+        Status_EventDescription;
         StickToLane;
-        Update_EntrantStat;  // empty heats don't show Entrant Stats
+        Update_EntrantStat; // empty heats don't show Entrant Stats
       end;
   end;
 end;
@@ -1353,6 +1342,20 @@ begin
   fConnectionCountdown := fConnectionCountdown - 1;
   lblAniIndicatorStatus.Text := 'Connecting ' + IntToStr(fConnectionCountdown);
 
+end;
+
+procedure TTimeKeeper.TruncateTimeChars(var s: string; nodp: integer);
+var
+indx, maxLen: integer;
+begin
+  if (Length(s) > (nodp + 6))  then
+  begin
+    // reverse truncate string so as not to exceed maxium.
+    indx := Length(s) - nodp - 6;
+    if indx < 1  then index := 1;
+    maxLen := Min(Length(s), nodp + 6);
+    s := Copy(s, indx, maxLen);
+  end;
 end;
 
 { TDefaultFont }
