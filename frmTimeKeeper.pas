@@ -445,6 +445,7 @@ begin
   begin
     s := bsEntrant.DataSet.FieldByName('RaceTimeStr').AsString;
     s := GetRawRaceTime(s);
+    StripTimeChars(s);
     s := GetDisplayRaceTime(s);
     txtRaceTime.Text := s;
   end;
