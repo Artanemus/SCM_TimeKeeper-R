@@ -34,6 +34,8 @@ Closed heats cannot be edited.
 > Use Windows **Apps and Features** to remove the application.
 
 ---
-![ScreenShot tabsheet 2.](ASSETS/Screenshot%202022-09-10%20151011.JPG)
+![ScreenShot tabsheet 2.](ASSETS/Screenshot%Tab1.JPG)
 
-![ScreenShot tabsheet 3.](ASSETS/Screenshot%202022-09-10%20151230.JPG)
+![ScreenShot tabsheet 2.](ASSETS/Screenshot%Tab2.JPG)
+
+![ScreenShot tabsheet 3.](ASSETS/Screenshot%Rab3.JPG)
