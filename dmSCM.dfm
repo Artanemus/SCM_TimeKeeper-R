@@ -459,7 +459,6 @@ object SCM: TSCM
   end
   object qryEvent: TFDQuery
     ActiveStoredUsage = [auDesignTime]
-    Active = True
     IndexFieldNames = 'SessionID'
     MasterSource = dsSession
     MasterFields = 'SessionID'
@@ -472,8 +471,6 @@ object SCM: TSCM
     UpdateOptions.UpdateTableName = 'SwimClubMeet..Event'
     UpdateOptions.KeyFields = 'EventID'
     SQL.Strings = (
-      'USE SwimClubMeet'
-      ''
       'SELECT Event.EventID'
       '    , Event.EventNum'
       '    , qryNominees.NomineeCount'

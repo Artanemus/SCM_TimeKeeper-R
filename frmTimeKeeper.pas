@@ -281,7 +281,6 @@ begin
   AniIndicator1.Visible := false;
   lblAniIndicatorStatus.Visible := false;
   AniIndicator1.Enabled := false;
-  SaveToSettings; // As this was a OK connection - store parameters.
   tabEventHeat.Text := 'Event-Heat';
   tabEntrantRaceTime.Text := 'Entrant-RaceTime';
   UpdateAction(actnDisconnect);

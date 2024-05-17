@@ -249,56 +249,23 @@ Visible=False
 [Label1]
 Coordinates=769,988,46,51
 
-[SCM.tblSwimClub]
-Visible=False
-Coordinates=705,749,102,33
-
 [SCM.qryEntrant]
 Visible=False
 Coordinates=213,1,92,33
-
-[SCM.qrySession]
-Visible=False
-Coordinates=705,56,95,33
 
 [SCM.qryHeat]
 Visible=False
 Coordinates=705,111,78,33
 
-[SCM.qryEvent]
-Visible=False
-Coordinates=0,520,84,33
-
 [SCM.qryLane]
 Visible=False
 Coordinates=705,166,80,33
-
-[SCM.dsSession]
-Coordinates=345,552,91,33
-
-[SCM.dsSwimClub]
-Coordinates=295,817,101,33
-
-[SCM.dsSCMSystem]
-Coordinates=1078,787,111,33
-
-[SCM.dsMember]
-Coordinates=525,386,91,33
-
-[SCM.dsEvent]
-Coordinates=101,479,80,33
-
-[SCM.qryMember]
-Coordinates=695,10,95,267
 
 [SCM.dsLane]
 Coordinates=106,1,76,33
 
 [SCM.dsHeat]
 Coordinates=0,0,74,33
-
-[SCM.qrySCMSystem]
-Coordinates=10,794,115,141
 
 [SCM.dsEntrant]
 Coordinates=345,1,88,33
