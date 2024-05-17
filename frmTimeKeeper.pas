@@ -48,11 +48,15 @@ type
     btn07: TButton;
     btn08: TButton;
     btn09: TButton;
+    btnBackSpace: TButton;
+    btnClear: TButton;
+    btnClearTime: TButton;
     btnConnect: TButton;
     btnDisconnect: TButton;
+    btnGetTime: TButton;
     btnPoint: TButton;
+    btnPost: TButton;
     btnRefresh: TButton;
-    btnClear: TButton;
     chkbLockToLane: TCheckBox;
     chkbSessionVisibility: TCheckBox;
     chkbUseOsAuthentication: TCheckBox;
@@ -62,10 +66,13 @@ type
     edtServerName: TEdit;
     edtUser: TEdit;
     GridPanelLayout1: TGridPanelLayout;
+    ImageControl2: TImageControl;
+    imgBackSpaceCntrl: TImageControl;
     Label1: TLabel;
     Label12: TLabel;
     Label18: TLabel;
-    lblTitleRaceTime: TLabel;
+    Label3: TLabel;
+    Label4: TLabel;
     Label7: TLabel;
     Label8: TLabel;
     Label9: TLabel;
@@ -73,10 +80,12 @@ type
     layEntrantList: TLayout;
     layEntrantName: TLayout;
     layEntrantRaceTime: TLayout;
+    layEntrantStats: TLayout;
     layEventHeat: TLayout;
     layEventHeatTitleBar: TLayout;
     layFooter: TLayout;
     layLoginToServer: TLayout;
+    Layout1: TLayout;
     layPersonalBest: TLayout;
     layRaceTime: TLayout;
     layRaceTimeDetail: TLayout;
@@ -84,12 +93,12 @@ type
     layRaceTimeEnterTime: TLayout;
     layRaceTimeText: TLayout;
     layRaceTimeTitleBar: TLayout;
+    layRace_Time: TLayout;
     laySelectSession: TLayout;
-    layTitleRaceTime: TLayout;
     layTabs: TLayout;
     layTimeToBeat: TLayout;
+    layTitleRaceTime: TLayout;
     lblAniIndicatorStatus: TLabel;
-    lblStatusBar: TLabel;
     lblEntrantName: TLabel;
     lblEvent: TLabel;
     lblHeat: TLabel;
@@ -97,11 +106,14 @@ type
     lblRaceTime: TLabel;
     lblSelectSession: TLabel;
     lblSelectSwimClub: TLabel;
+    lblStatusBar: TLabel;
     lblTimeToBeat: TLabel;
+    lblTitleRaceTime: TLabel;
     LinkListControlToField1: TLinkListControlToField;
     LinkListControlToField2: TLinkListControlToField;
     LinkListControlToField3: TLinkListControlToField;
     LinkListControlToField4: TLinkListControlToField;
+    LinkListControlToField5: TLinkListControlToField;
     LinkPropertyToFieldText5: TLinkPropertyToField;
     LinkPropertyToFieldText6: TLinkPropertyToField;
     LinkPropertyToFieldText7: TLinkPropertyToField;
@@ -109,8 +121,11 @@ type
     ListViewEvent: TListView;
     ListViewHeat: TListView;
     ListViewLane: TListView;
+    Rectangle1: TRectangle;
+    Rectangle2: TRectangle;
     ScaledLayout1: TScaledLayout;
     SizeGrip1: TSizeGrip;
+    spinbNumOfDecimalPlaces: TSpinBox;
     spinboxLockToLane: TSpinBox;
     StyleBook1: TStyleBook;
     StyleBook2: TStyleBook;
@@ -120,22 +135,7 @@ type
     tabLoginSession: TTabItem;
     Timer1: TTimer;
     txt03: TLabel;
-    Label3: TLabel;
-    LinkListControlToField5: TLinkListControlToField;
-    btnBackSpace: TButton;
-    imgBackSpaceCntrl: TImageControl;
     txtRaceTime: TLabel;
-    btnPost: TButton;
-    btnGetTime: TButton;
-    ImageControl2: TImageControl;
-    spinbNumOfDecimalPlaces: TSpinBox;
-    Layout1: TLayout;
-    Label4: TLabel;
-    Rectangle1: TRectangle;
-    btnClearTime: TButton;
-    layRace_Time: TLayout;
-    layEntrantStats: TLayout;
-    Rectangle2: TRectangle;
     procedure actnConnectExecute(Sender: TObject);
     procedure actnConnectUpdate(Sender: TObject);
     procedure actnDisconnectExecute(Sender: TObject);
@@ -145,10 +145,10 @@ type
     procedure actnRefreshExecute(Sender: TObject);
     procedure actnRefreshUpdate(Sender: TObject);
     procedure btnBackSpaceClick(Sender: TObject);
-    procedure btnNumClick(Sender: TObject);
     procedure btnClearClick(Sender: TObject);
     procedure btnClearTimeClick(Sender: TObject);
     procedure btnGetTimeClick(Sender: TObject);
+    procedure btnNumClick(Sender: TObject);
     procedure btnPointClick(Sender: TObject);
     procedure chkbSessionVisibilityChange(Sender: TObject);
     procedure cmbSessionListChange(Sender: TObject);
@@ -165,33 +165,31 @@ type
     procedure ListViewLaneChange(Sender: TObject);
     procedure TabControl1Change(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
-  private const
+  private
+  const
     CONNECTIONTIMEOUT = 48;
   var
     fConnectionCountdown: Integer;
     fLoginTimeOut: Integer;
     fNumOfLanes: Integer;
-
-    procedure Status_ConnectionDescription;
-    procedure StripTimeChars(var s: string);
-    procedure TruncateTimeChars(var s: string; nodp: integer = 2);
+    procedure ClearRaceTime;
     procedure ConnectOnTerminate(Sender: TObject);
+    function GetDisplayRaceTime(aRawString: string): string;
+    function GetRawRaceTime(RaceTimeStr: string): string;
     function GetSCMVerInfo(): string;
-
     procedure LoadFromSettings; // JSON Program Settings
     procedure LoadSettings; // JSON Program Settings
     procedure PostRaceTime;
-    procedure ClearRaceTime;
     procedure SaveToSettings; // JSON Program Settings
+    procedure Status_ConnectionDescription;
+    procedure Status_EventDescription;
+    procedure StickToLane;
+    procedure StripTimeChars(var s: string);
+    procedure TruncateTimeChars(var s: string; nodp: integer = 2);
+    procedure Update_EntrantStat;
     procedure Update_Layout;
     procedure Update_SessionVisibility;
     procedure Update_TabSheetCaptions;
-    procedure Update_EntrantStat;
-    procedure Status_EventDescription;
-    function GetDisplayRaceTime(aRawString: string): string;
-    function GetRawRaceTime(RaceTimeStr: string): string;
-    procedure StickToLane;
-
   public
     { Public declarations }
     procedure Refresh_Entrant;
@@ -219,7 +217,7 @@ uses
 
 procedure TTimeKeeper.actnConnectExecute(Sender: TObject);
 var
-  Thread: TThread;
+  myThread: TThread;
   sc: TSimpleConnect;
 begin
   if (Assigned(SCM) and (SCM.scmConnection.Connected = false)) then
@@ -233,7 +231,7 @@ begin
     actnConnect.Visible := false;
     application.ProcessMessages;
 
-    Thread := TThread.CreateAnonymousThread(
+    myThread := TThread.CreateAnonymousThread(
       procedure
       begin
         // can only be assigned if not connected
@@ -247,8 +245,9 @@ begin
         Timer1.Enabled := false;
         sc.Free
       end);
-    Thread.OnTerminate := ConnectOnTerminate;
-    Thread.Start;
+
+    myThread.OnTerminate := ConnectOnTerminate;
+    myThread.Start;
   end;
 
 end;
@@ -386,18 +385,6 @@ begin
     actnRefresh.Enabled := false;
 end;
 
-procedure TTimeKeeper.btnNumClick(Sender: TObject);
-var
-  s: string;
-begin
-  s := txtRaceTime.Text;
-  s := s + TButton(Sender).Text;
-  StripTimeChars(s);
-  TruncateTimeChars(s, ROUND(spinbNumOfDecimalPlaces.Value));
-  s := GetDisplayRaceTime(s);
-  txtRaceTime.Text := s;
-end;
-
 procedure TTimeKeeper.btnBackSpaceClick(Sender: TObject);
 var
   s: string;
@@ -408,7 +395,6 @@ begin
   s := GetDisplayRaceTime(s);
   txtRaceTime.Text := s;
 end;
-
 
 procedure TTimeKeeper.btnClearClick(Sender: TObject);
 begin
@@ -449,6 +435,18 @@ begin
     s := GetDisplayRaceTime(s);
     txtRaceTime.Text := s;
   end;
+end;
+
+procedure TTimeKeeper.btnNumClick(Sender: TObject);
+var
+  s: string;
+begin
+  s := txtRaceTime.Text;
+  s := s + TButton(Sender).Text;
+  StripTimeChars(s);
+  TruncateTimeChars(s, ROUND(spinbNumOfDecimalPlaces.Value));
+  s := GetDisplayRaceTime(s);
+  txtRaceTime.Text := s;
 end;
 
 procedure TTimeKeeper.btnPointClick(Sender: TObject);
@@ -690,7 +688,7 @@ begin
 
   // READ APPLICATION   C O N F I G U R A T I O N   PARAMS.
   // JSON connection settings. Windows location :
-  // %SYSTEMDRIVE\%%USER%\%USERNAME%\AppData\Roaming\Artanemus\SwimClubMeet
+  // %SYSTEMDRIVE\%%USER%\%USERNAME%\AppData\Roaming\Artanemus\SwimClubMeet\TimeKeeper
   LoadSettings;
 
   // TAB_SHEET : DEFAULT: Login-Session
@@ -1147,6 +1145,22 @@ begin
   Refresh_Entrant;
 end;
 
+procedure TTimeKeeper.SaveToSettings;
+begin
+  Settings.Server := edtServerName.Text;
+  Settings.User := edtUser.Text;
+  Settings.Password := edtPassword.Text;
+  if chkbUseOsAuthentication.IsChecked then
+    Settings.OSAuthent := true
+  else
+    Settings.OSAuthent := false;
+  Settings.SessionVisibility := chkbSessionVisibility.IsChecked;
+  Settings.LockToLane := chkbLockToLane.IsChecked;
+  Settings.LoginTimeOut := fLoginTimeOut;
+  Settings.LockToLaneNumber := Round(spinboxLockToLane.Value);
+  Settings.SaveToFile();
+end;
+
 procedure TTimeKeeper.Status_ConnectionDescription;
 begin
   if Assigned(SCM) and SCM.IsActive then
@@ -1209,20 +1223,42 @@ begin
 
 end;
 
-procedure TTimeKeeper.SaveToSettings;
+procedure TTimeKeeper.TabControl1Change(Sender: TObject);
 begin
-  Settings.Server := edtServerName.Text;
-  Settings.User := edtUser.Text;
-  Settings.Password := edtPassword.Text;
-  if chkbUseOsAuthentication.IsChecked then
-    Settings.OSAuthent := true
-  else
-    Settings.OSAuthent := false;
-  Settings.SessionVisibility := chkbSessionVisibility.IsChecked;
-  Settings.LockToLane := chkbLockToLane.IsChecked;
-  Settings.LoginTimeOut := fLoginTimeOut;
-  Settings.LockToLaneNumber := Round(spinboxLockToLane.Value);
-  Settings.SaveToFile();
+  case TabControl1.TabIndex of
+    0:
+      Status_ConnectionDescription;
+    1:
+      Status_EventDescription;
+    2:
+      begin
+        Status_EventDescription;
+        StickToLane;
+        Update_EntrantStat; // empty heats don't show Entrant Stats
+      end;
+  end;
+end;
+
+procedure TTimeKeeper.Timer1Timer(Sender: TObject);
+begin
+
+  fConnectionCountdown := fConnectionCountdown - 1;
+  lblAniIndicatorStatus.Text := 'Connecting ' + IntToStr(fConnectionCountdown);
+
+end;
+
+procedure TTimeKeeper.TruncateTimeChars(var s: string; nodp: integer);
+var
+indx, maxLen: integer;
+begin
+  if (Length(s) > (nodp + 6))  then
+  begin
+    // reverse truncate string so as not to exceed maxium.
+    indx := Length(s) - nodp - 6;
+    if indx < 1  then index := 1;
+    maxLen := Min(Length(s), nodp + 6);
+    s := Copy(s, indx, maxLen);
+  end;
 end;
 
 procedure TTimeKeeper.Update_EntrantStat;
@@ -1318,44 +1354,6 @@ begin
   begin
     tabEventHeat.Text := 'Event-Heat';
     tabEntrantRaceTime.Text := 'Entrant-RaceTime';
-  end;
-end;
-
-procedure TTimeKeeper.TabControl1Change(Sender: TObject);
-begin
-  case TabControl1.TabIndex of
-    0:
-      Status_ConnectionDescription;
-    1:
-      Status_EventDescription;
-    2:
-      begin
-        Status_EventDescription;
-        StickToLane;
-        Update_EntrantStat; // empty heats don't show Entrant Stats
-      end;
-  end;
-end;
-
-procedure TTimeKeeper.Timer1Timer(Sender: TObject);
-begin
-
-  fConnectionCountdown := fConnectionCountdown - 1;
-  lblAniIndicatorStatus.Text := 'Connecting ' + IntToStr(fConnectionCountdown);
-
-end;
-
-procedure TTimeKeeper.TruncateTimeChars(var s: string; nodp: integer);
-var
-indx, maxLen: integer;
-begin
-  if (Length(s) > (nodp + 6))  then
-  begin
-    // reverse truncate string so as not to exceed maxium.
-    indx := Length(s) - nodp - 6;
-    if indx < 1  then index := 1;
-    maxLen := Min(Length(s), nodp + 6);
-    s := Copy(s, indx, maxLen);
   end;
 end;
 
