@@ -34,8 +34,10 @@ Closed heats cannot be edited.
 > Use Windows **Apps and Features** to remove the application.
 
 ---
-![ScreenShot tabsheet 1.](ASSETS/Screenshot%Tab1.JPG)
 
-![ScreenShot tabsheet 2.](ASSETS/Screenshot%Tab2.JPG)
+![ScreenshotTab1](https://github.com/Artanemus/SCM_TimeKeeper-R/assets/69775305/36e94cc8-fd92-47bf-b421-81b40a9b91d7)
 
-![ScreenShot tabsheet 3.](ASSETS/Screenshot%Rab3.JPG)
+![ScreenshotTab2](https://github.com/Artanemus/SCM_TimeKeeper-R/assets/69775305/d705641b-4f9e-4a6a-80d1-5bcbc2d03785)
+
+![ScreenshotTab3](https://github.com/Artanemus/SCM_TimeKeeper-R/assets/69775305/754b07bb-4d19-45cd-ae91-9179fa94b392)
+
