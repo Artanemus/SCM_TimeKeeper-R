@@ -27,9 +27,7 @@ The application will ask you to login to the database. If you are running on a t
 
 Browse the events and heats to locate the entrant. When entering time, **don't use : or leading zeros.** Characters enter right to left in the display. As well as touch screen, the numpad can be used. You must post your changes for qualification to be enacted.
 
-There's also a stop watch - why? I don't know. 😀
-
-Closed heats cannot be edited.
+Locked sessions and closed heats cannot be edited.
 
 > Use Windows **Apps and Features** to remove the application.
 
