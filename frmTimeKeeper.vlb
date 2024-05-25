@@ -348,3 +348,12 @@ Visible=False
 Coordinates=710,390,114,33
 Visible=False
 
+[SCM.tblSwimClub]
+Visible=False
+
+[SCM.qrySession]
+Visible=False
+
+[SCM.qryEvent]
+Visible=False
+
